@@ -1,29 +1,57 @@
-type Token @entity {
-  id: ID!
-  owner: Owner
-  transfers: [Transfer!]! @derivedFrom(field: "token")
-  contract: Contract
+type Domain @entity {
+  id: ID!                                               # The namehash of the name
+  name: String                                          # The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth)
+  labelName: String                                     # The human readable label name (imported from CSV), if known
+  labelhash: String                                      # keccak256(labelName)
+  parent: Domain                                        # The namehash (id) of the parent name
+  subdomains: [Domain!]! @derivedFrom(field: "parent")  # Can count domains from length of array
+  subdomainCount: Int!                                  # The number of subdomains
+  resolvedAddress: Account                              # Address logged from current resolver, if any
+  owner: Account!
+  resolver: Resolver
+  ttl: BigInt
+  isMigrated: Boolean!
+  createdAt: BigInt!
+
+  registration: Registration @derivedFrom(field: "domain")
 }
 
-type Owner @entity {
+type Registration @entity {
   id: ID!
-  ownedTokens: [Token!] @derivedFrom(field: "owner")
+  domain: Domain! @unique
+  registrationDate: BigInt!
+  expiryDate: BigInt!
+  cost: BigInt
+  registrant: Account!
+  labelName: String
 }
 
-type Contract @entity {
+type Account @entity {
   id: ID!
-  name: String! @index
-  symbol: String!
-  totalSupply: BigInt!
-  tokens: [Token!]! @derivedFrom(field: "contract")
+  domains: [Domain!]! @derivedFrom(field: "owner")
+  registrations: [Registration!] @derivedFrom(field: "registrant")
 }
 
-type Transfer @entity {
+type Resolver @entity {
+  id: ID!                   # Concatenation of resolver address and namehash
+  domain: Domain
+  address: String!           # Address of resolver contract
+  addr: Account             # Current value of addr record (per events)
+  contentHash: String        # Content hash, in binary format.
+  texts: [String!]          # Set of observed text record keys
+  textChangeds: [TextChanged!] @derivedFrom(field: "resolver")
+  x: String
+  y: String
+  name: String
+  muiltcoinAddress: String
+  coinTypes: [String!]
+}
+
+type TextChanged @entity {
   id: ID!
-  token: Token!
-  from: Owner
-  to: Owner
-  timestamp: BigInt!
-  block: Int! @index
-  transactionHash: String!
+  resolver: Resolver!
+  blockNumber: Int!
+  transactionID: Bytes!
+  key: String!
+  value: String
 }
