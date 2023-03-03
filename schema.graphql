@@ -38,13 +38,13 @@ type Resolver @entity {
   address: String!           # Address of resolver contract
   addr: Account             # Current value of addr record (per events)
   contentHash: String        # Content hash, in binary format.
-  texts: [String!]          # Set of observed text record keys
+  texts: [String!]!          # Set of observed text record keys
   textChangeds: [TextChanged!] @derivedFrom(field: "resolver")
   x: String
   y: String
   name: String
   muiltcoinAddress: String
-  coinTypes: [String!]
+  coinTypes: [String!]!
 }
 
 type TextChanged @entity {

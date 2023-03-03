@@ -200,7 +200,7 @@ export async function handleVersionChanged(
   );
   resolver.addr = null;
   resolver.contentHash = null;
-  resolver.texts = null;
+  resolver.texts = [];
   await store.upsert(resolver);
 }
 
@@ -215,6 +215,9 @@ async function getOrCreateResolver(
     resolver = new Resolver({ id });
     resolver.domain = await getDomain(store, node);
     resolver.address = address;
+    resolver.texts = [];
+    resolver.coinTypes = [];
+    await store.insert(resolver);
   }
   return resolver;
 }

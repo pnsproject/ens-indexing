@@ -26,8 +26,8 @@ export class Resolver {
     @Column_("text", {nullable: true})
     contentHash!: string | undefined | null
 
-    @Column_("text", {array: true, nullable: true})
-    texts!: (string)[] | undefined | null
+    @Column_("text", {array: true, nullable: false})
+    texts!: (string)[]
 
     @OneToMany_(() => TextChanged, e => e.resolver)
     textChangeds!: TextChanged[]
@@ -44,6 +44,6 @@ export class Resolver {
     @Column_("text", {nullable: true})
     muiltcoinAddress!: string | undefined | null
 
-    @Column_("text", {array: true, nullable: true})
-    coinTypes!: (string)[] | undefined | null
+    @Column_("text", {array: true, nullable: false})
+    coinTypes!: (string)[]
 }
