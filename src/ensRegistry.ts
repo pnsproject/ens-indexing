@@ -53,7 +53,7 @@ async function _handleNewOwner(
     domain = new Domain({ id: subnode });
     domain.createdAt = BigInt(block.timestamp);
     domain.subdomainCount = 0;
-    store.insert(domain);
+    await store.insert(domain);
   }
 
   if (domain.parent == null && parent != null) {
@@ -90,7 +90,7 @@ async function _handleNewOwner(
   domain.parent = parent;
   domain.labelhash = event.label;
   domain.isMigrated = isMigrated;
-  store.upsert(domain);
+  await store.upsert(domain);
 }
 
 export async function handleTransfer(
@@ -106,7 +106,7 @@ export async function handleTransfer(
   let domain = (await getDomain(store, node))!;
 
   domain.owner = account;
-  store.upsert(domain);
+  await store.upsert(domain);
 }
 
 // Handler for NewResolver events
@@ -126,12 +126,12 @@ export async function handleNewResolver(
     resolver = new Resolver({ id });
     resolver.domain = domain;
     resolver.address = event.resolver;
-    store.insert(resolver);
+    await store.insert(resolver);
   } else {
     domain.resolvedAddress = resolver.addr;
   }
   domain.resolver = resolver!;
-  store.upsert(domain);
+  await store.upsert(domain);
 }
 
 // Handler for NewTTL events
@@ -146,7 +146,7 @@ export async function handleNewTTL(
   // in the same transaction as setting TTL
   if (domain) {
     domain.ttl = event.ttl.toBigInt();
-    store.upsert(domain);
+    await store.upsert(domain);
   }
 }
 
@@ -169,7 +169,7 @@ export async function handleNewOwnerOldRegistry(
   let domain = await getDomain(store, subnode);
 
   if (domain == null || domain.isMigrated == false) {
-    _handleNewOwner(store, block, raw_event, false);
+    await _handleNewOwner(store, block, raw_event, false);
   }
 }
 
@@ -205,6 +205,6 @@ export async function handleTransferOldRegistry(
   let event = registry.events.Transfer.decode(raw_event);
   let domain = (await getDomain(store, event.node))!;
   if (domain.isMigrated == false) {
-    handleTransfer(store, raw_event);
+    await handleTransfer(store, raw_event);
   }
 }

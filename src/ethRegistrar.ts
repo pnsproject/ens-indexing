@@ -53,8 +53,8 @@ export async function handleNameRegistered(
       domain.name = labelName + ".eth";
       registration.labelName = labelName;
     }
-    store.upsert(domain);
-    store.upsert(registration);
+    await store.upsert(domain);
+    await store.upsert(registration);
   }
 }
 
@@ -106,7 +106,7 @@ async function setNamePreimage(
     if (domain.labelName !== name) {
       domain.labelName = name;
       domain.name = name + ".eth";
-      store.upsert(domain);
+      await store.upsert(domain);
     }
   }
 
@@ -114,7 +114,7 @@ async function setNamePreimage(
   if (registration == null) return;
   registration.labelName = name;
   registration.cost = cost;
-  store.upsert(registration);
+  await store.upsert(registration);
 }
 
 export async function handleNameRenewed(
@@ -126,7 +126,7 @@ export async function handleNameRenewed(
   let registration = await store.get(Registration, label.toString());
   if (registration) {
     registration.expiryDate = event.expires.toBigInt();
-    store.upsert(registration);
+    await store.upsert(registration);
   }
 }
 
@@ -144,5 +144,5 @@ export async function handleNameTransferred(
   if (registration == null) return;
 
   registration.registrant = account;
-  store.upsert(registration);
+  await store.upsert(registration);
 }

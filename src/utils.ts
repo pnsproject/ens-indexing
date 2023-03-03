@@ -49,7 +49,7 @@ export async function createOrLoadAccount(
   let account = await store.get(Account, address);
   if (account == null) {
     account = new Account({ id: address, domains: [] });
-    store.insert(account);
+    await store.insert(account);
   }
 
   return account;
@@ -71,7 +71,7 @@ export async function createOrLoadDomain(
       isMigrated,
       createdAt,
     });
-    store.insert(domain);
+    await store.insert(domain);
   }
 
   return domain;
@@ -94,7 +94,7 @@ export async function createOrLoadRegistration(
       registrationDate,
       expiryDate,
     });
-    store.insert(registration);
+    await store.insert(registration);
   }
 
   return registration;

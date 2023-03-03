@@ -24,12 +24,12 @@ export async function handleAddrChanged(
   resolver.domain = await getDomain(store, event.node);
   resolver.address = raw_event.address;
   resolver.addr = account;
-  store.upsert(resolver);
+  await store.upsert(resolver);
 
   let domain = await getDomain(store, event.node);
   if (domain && domain.resolver == resolver) {
     domain.resolvedAddress = account;
-    store.upsert(domain);
+    await store.upsert(domain);
   }
 }
 
@@ -47,13 +47,13 @@ export async function handleMulticoinAddrChanged(
   let coinType = event.coinType;
   if (resolver.coinTypes == null) {
     resolver.coinTypes = [coinType.toString()];
-    store.upsert(resolver);
+    await store.upsert(resolver);
   } else {
     let coinTypes = resolver.coinTypes!;
     if (!coinTypes.includes(coinType.toString())) {
       coinTypes.push(coinType.toString());
       resolver.coinTypes = coinTypes;
-      store.upsert(resolver);
+      await store.upsert(resolver);
     }
   }
 }
@@ -71,7 +71,7 @@ export async function handleNameChanged(
     raw_event.address
   );
   resolver.name = event.name;
-  store.upsert(resolver);
+  await store.upsert(resolver);
 }
 
 export async function handlePubkeyChanged(
@@ -108,13 +108,13 @@ export async function handleTextChanged(
   let key = event.key;
   if (resolver.texts == null) {
     resolver.texts = [key];
-    store.upsert(resolver);
+    await store.upsert(resolver);
   } else {
     let texts = resolver.texts!;
     if (!texts.includes(key)) {
       texts.push(key);
       resolver.texts = texts;
-      store.upsert(resolver);
+      await store.upsert(resolver);
     }
   }
 
@@ -123,7 +123,7 @@ export async function handleTextChanged(
   resolverEvent.blockNumber = block.height;
   resolverEvent.transactionID = new TextEncoder().encode(transactionHash);
   resolverEvent.key = event.key;
-  store.insert(resolverEvent);
+  await store.insert(resolverEvent);
 }
 
 export async function handleTextChangedWithValue(
@@ -145,13 +145,13 @@ export async function handleTextChangedWithValue(
   let key = event.key;
   if (resolver.texts == null) {
     resolver.texts = [key];
-    store.upsert(resolver);
+    await store.upsert(resolver);
   } else {
     let texts = resolver.texts!;
     if (!texts.includes(key)) {
       texts.push(key);
       resolver.texts = texts;
-      store.upsert(resolver);
+      await store.upsert(resolver);
     }
   }
 
@@ -161,7 +161,7 @@ export async function handleTextChangedWithValue(
   resolverEvent.transactionID = new TextEncoder().encode(transactionHash);
   resolverEvent.key = event.key;
   resolverEvent.value = event.value;
-  store.insert(resolverEvent);
+  await store.insert(resolverEvent);
 }
 
 export async function handleContentHashChanged(
@@ -175,7 +175,7 @@ export async function handleContentHashChanged(
     raw_event.address
   );
   resolver.contentHash = event.hash;
-  store.upsert(resolver);
+  await store.upsert(resolver);
 }
 
 export async function handleVersionChanged(
@@ -190,7 +190,7 @@ export async function handleVersionChanged(
     domain.resolver?.id === createResolverID(event.node, raw_event.address)
   ) {
     domain.resolvedAddress = null;
-    store.upsert(domain);
+    await store.upsert(domain);
   }
 
   let resolver = await getOrCreateResolver(
@@ -201,7 +201,7 @@ export async function handleVersionChanged(
   resolver.addr = null;
   resolver.contentHash = null;
   resolver.texts = null;
-  store.upsert(resolver);
+  await store.upsert(resolver);
 }
 
 async function getOrCreateResolver(
