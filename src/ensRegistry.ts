@@ -173,13 +173,9 @@ export async function handleNewOwnerOldRegistry(
     await _handleNewOwner(store, block, raw_event, false);
     return;
   }
-  if (domain.isMigrated === undefined) {
-    return;
-  }
-  if (domain.isMigrated != null) {
-    if (domain.isMigrated == false) {
-      await _handleNewOwner(store, block, raw_event, false);
-    }
+
+  if (domain.isMigrated == false) {
+    await _handleNewOwner(store, block, raw_event, false);
   }
 }
 
@@ -191,17 +187,9 @@ export async function handleNewResolverOldRegistry(
   let event = registry.events.NewResolver.decode(raw_event);
   let node = event.node;
   let domain = (await getDomain(store, node, BigInt(block.timestamp)))!;
-  if (node == ROOT_NODE) {
+  if (node == ROOT_NODE || domain.isMigrated == false) {
     await handleNewResolver(store, raw_event);
     return;
-  }
-  if (domain.isMigrated === undefined) {
-    return;
-  }
-  if (domain.isMigrated != null) {
-    if (!domain.isMigrated) {
-      await handleNewResolver(store, raw_event);
-    }
   }
 }
 export async function handleNewTTLOldRegistry(
@@ -210,13 +198,9 @@ export async function handleNewTTLOldRegistry(
 ): Promise<void> {
   let event = registry.events.NewTTL.decode(raw_event);
   let domain = (await getDomain(store, event.node))!;
-  if (domain.isMigrated === undefined) {
-    return;
-  }
-  if (domain.isMigrated != null) {
-    if (domain.isMigrated == false) {
-      await handleNewTTL(store, raw_event);
-    }
+
+  if (domain.isMigrated == false) {
+    await handleNewTTL(store, raw_event);
   }
 }
 
@@ -226,12 +210,7 @@ export async function handleTransferOldRegistry(
 ): Promise<void> {
   let event = registry.events.Transfer.decode(raw_event);
   let domain = (await getDomain(store, event.node))!;
-  if (domain.isMigrated === undefined) {
-    return;
-  }
-  if (domain.isMigrated != null) {
-    if (domain.isMigrated == false) {
-      await handleTransfer(store, raw_event);
-    }
+  if (domain.isMigrated == false) {
+    await handleTransfer(store, raw_event);
   }
 }
