@@ -62,6 +62,7 @@ async function _handleNewOwner(
     domain = new Domain({ id: subnode });
     domain.createdAt = BigInt(block.timestamp);
     domain.subdomainCount = 0;
+    store.insert(domain);
   }
 
   if (domain.parent == null && parent != null) {
@@ -85,7 +86,7 @@ async function _handleNewOwner(
     ) {
       domain.name = label;
     } else {
-      if (parent != null) {
+      if (parent) {
         let name = parent.name;
         if (label && name) {
           domain.name = label + "." + name;
