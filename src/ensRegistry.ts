@@ -4,8 +4,6 @@ import { Domain, Resolver } from "./model";
 import * as registry from "./abi/Registry";
 import {
   createOrLoadAccount,
-  createOrLoadDomain,
-  EMPTY_ADDRESS,
   ROOT_NODE,
   concat,
   byteArrayFromHex,
@@ -21,7 +19,6 @@ export async function getDomain(
   if (domain == null && node == ROOT_NODE) {
     let domain = new Domain({
       id: node,
-      isMigrated: true,
       createdAt: timestamp,
       subdomainCount: 0,
     });
@@ -191,7 +188,6 @@ export async function handleNewResolverOldRegistry(
 }
 export async function handleNewTTLOldRegistry(
   store: Store,
-  block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
   let event = registry.events.NewTTL.decode(raw_event);
@@ -203,7 +199,6 @@ export async function handleNewTTLOldRegistry(
 
 export async function handleTransferOldRegistry(
   store: Store,
-  block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
   let event = registry.events.Transfer.decode(raw_event);

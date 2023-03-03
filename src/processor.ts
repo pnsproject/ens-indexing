@@ -179,7 +179,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (i.kind === "evmLog") {
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
           if (isOld(i.address)) {
-            await handleTransferOldRegistry(ctx.store, c.header, i.evmLog);
+            await handleTransferOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleTransfer(ctx.store, i.evmLog);
           }
@@ -197,7 +197,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           }
         } else if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {
           if (isOld(i.address)) {
-            await handleNewTTLOldRegistry(ctx.store, c.header, i.evmLog);
+            await handleNewTTLOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleNewTTL(ctx.store, i.evmLog);
           }

@@ -47,8 +47,8 @@ export class Domain {
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
     ttl!: bigint | undefined | null
 
-    @Column_("bool", {nullable: false})
-    isMigrated!: boolean
+    @Column_("bool", {nullable: true})
+    isMigrated!: boolean | undefined | null
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     createdAt!: bigint

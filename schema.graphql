@@ -10,7 +10,7 @@ type Domain @entity {
   owner: Account!
   resolver: Resolver
   ttl: BigInt
-  isMigrated: Boolean!
+  isMigrated: Boolean
   createdAt: BigInt!
 
   registration: Registration @derivedFrom(field: "domain")
