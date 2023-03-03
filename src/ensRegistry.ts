@@ -28,7 +28,7 @@ async function createDomain(
   return domain;
 }
 
-async function getDomain(
+export async function getDomain(
   store: Store,
   node: string,
   timestamp: bigint = BigInt(0)
@@ -95,7 +95,7 @@ async function _handleNewOwner(
   }
 
   domain.owner = account;
-  domain.parent = await createOrLoadDomain(store, event.node);
+  domain.parent = parent;
   domain.labelhash = event.label;
   domain.isMigrated = isMigrated;
   store.upsert(domain);

@@ -7,6 +7,7 @@ import {
   createOrLoadDomain,
 } from "./utils";
 import * as publicResolver from "./abi/PublicResolver";
+import { getDomain } from "./ensRegistry";
 
 export async function handleAddrChanged(
   store: Store,
@@ -20,12 +21,12 @@ export async function handleAddrChanged(
     event.node,
     raw_event.address
   );
-  resolver.domain = await createOrLoadDomain(store, event.node);
+  resolver.domain = await getDomain(store, event.node);
   resolver.address = raw_event.address;
   resolver.addr = account;
   store.upsert(resolver);
 
-  let domain = await createOrLoadDomain(store, event.node);
+  let domain = await getDomain(store, event.node);
   if (domain && domain.resolver == resolver) {
     domain.resolvedAddress = account;
     store.upsert(domain);
@@ -183,7 +184,7 @@ export async function handleVersionChanged(
 ): Promise<void> {
   let event = publicResolver.events.VersionChanged.decode(raw_event);
 
-  let domain = await createOrLoadDomain(store, event.node);
+  let domain = await getDomain(store, event.node);
   if (
     domain &&
     domain.resolver?.id === createResolverID(event.node, raw_event.address)
@@ -212,7 +213,7 @@ async function getOrCreateResolver(
   let resolver = await store.get(Resolver, id);
   if (resolver == null) {
     resolver = new Resolver({ id });
-    resolver.domain = await createOrLoadDomain(store, node);
+    resolver.domain = await getDomain(store, node);
     resolver.address = address;
   }
   return resolver;

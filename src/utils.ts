@@ -3,6 +3,7 @@ import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { keccak256 } from "ethers/lib/utils";
 import { Account, Domain, Registration } from "./model";
+import { boolean } from "./model/generated/marshal";
 
 export function createEventID(block: EvmBlock, raw_event: EvmLog): string {
   return block.height.toString().concat("-").concat(raw_event.index.toString());
@@ -47,7 +48,7 @@ export async function createOrLoadAccount(
 ): Promise<Account> {
   let account = await store.get(Account, address);
   if (account == null) {
-    account = new Account({ id: address });
+    account = new Account({ id: address, domains: [] });
     store.insert(account);
   }
 
@@ -56,11 +57,20 @@ export async function createOrLoadAccount(
 
 export async function createOrLoadDomain(
   store: Store,
-  node: string
+  node: string,
+  owner: Account,
+  isMigrated: boolean,
+  createdAt: bigint
 ): Promise<Domain> {
   let domain = await store.get(Domain, node);
   if (domain == null) {
-    domain = new Domain({ id: node });
+    domain = new Domain({
+      id: node,
+      subdomainCount: 0,
+      owner,
+      isMigrated,
+      createdAt,
+    });
     store.insert(domain);
   }
 
@@ -69,11 +79,21 @@ export async function createOrLoadDomain(
 
 export async function createOrLoadRegistration(
   store: Store,
-  id: string
+  id: string,
+  domain: Domain,
+  registrationDate: bigint,
+  expiryDate: bigint,
+  registrant: Account
 ): Promise<Registration> {
   let registration = await store.get(Registration, id);
   if (registration == null) {
-    registration = new Registration({ id });
+    registration = new Registration({
+      id,
+      domain,
+      registrant,
+      registrationDate,
+      expiryDate,
+    });
     store.insert(registration);
   }
 

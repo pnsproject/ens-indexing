@@ -16,6 +16,7 @@ import * as controller from "./abi/EthRegistrarController";
 
 import { keccak256 } from "ethers/lib/utils";
 import { Registration } from "./model";
+import { getDomain } from "./ensRegistry";
 
 var rootNode: Uint8Array = byteArrayFromHex(
   "93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"
@@ -30,25 +31,31 @@ export async function handleNameRegistered(
   let owner = await createOrLoadAccount(store, event.owner);
 
   let label = uint256ToByteArray(event.id.toBigInt());
-  let registration = await createOrLoadRegistration(store, label.toString());
-  let domain = await createOrLoadDomain(
-    store,
-    keccak256(concat(rootNode, label))
-  );
+  let domain = await getDomain(store, keccak256(concat(rootNode, label)));
+  if (domain) {
+    let registration = await createOrLoadRegistration(
+      store,
+      label.toString(),
+      domain,
+      BigInt(block.timestamp),
+      event.expires.toBigInt(),
+      owner
+    );
 
-  registration.domain = domain;
-  registration.registrationDate = BigInt(block.timestamp);
-  registration.expiryDate = event.expires.toBigInt();
-  registration.registrant = owner;
+    registration.domain = domain;
+    registration.registrationDate = BigInt(block.timestamp);
+    registration.expiryDate = event.expires.toBigInt();
+    registration.registrant = owner;
 
-  let labelName = nameByHash(label.toString());
-  if (labelName != null) {
-    domain.labelName = labelName;
-    domain.name = labelName + ".eth";
-    registration.labelName = labelName;
+    let labelName = nameByHash(label.toString());
+    if (labelName != null) {
+      domain.labelName = labelName;
+      domain.name = labelName + ".eth";
+      registration.labelName = labelName;
+    }
+    store.upsert(domain);
+    store.upsert(registration);
   }
-  store.upsert(domain);
-  store.upsert(registration);
 }
 
 export async function handleNameRegisteredByControllerOld(
@@ -91,17 +98,19 @@ async function setNamePreimage(
     return;
   }
 
-  let domain = await createOrLoadDomain(
+  let domain = await getDomain(
     store,
     keccak256(concat(rootNode, new TextEncoder().encode(label)))
   );
-  if (domain.labelName !== name) {
-    domain.labelName = name;
-    domain.name = name + ".eth";
-    store.upsert(domain);
+  if (domain) {
+    if (domain.labelName !== name) {
+      domain.labelName = name;
+      domain.name = name + ".eth";
+      store.upsert(domain);
+    }
   }
 
-  let registration = await createOrLoadRegistration(store, label);
+  let registration = await store.get(Registration, label);
   if (registration == null) return;
   registration.labelName = name;
   registration.cost = cost;
@@ -114,9 +123,11 @@ export async function handleNameRenewed(
 ): Promise<void> {
   let event = registrar.events.NameRenewed.decode(raw_event);
   let label = uint256ToByteArray(event.id.toBigInt());
-  let registration = await createOrLoadRegistration(store, label.toString());
-  registration.expiryDate = event.expires.toBigInt();
-  store.upsert(registration);
+  let registration = await store.get(Registration, label.toString());
+  if (registration) {
+    registration.expiryDate = event.expires.toBigInt();
+    store.upsert(registration);
+  }
 }
 
 export async function handleNameTransferred(
