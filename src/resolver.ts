@@ -38,24 +38,7 @@ export async function handleMulticoinAddrChanged(
   raw_event: EvmLog
 ): Promise<void> {
   let event = publicResolver.events.AddressChanged.decode(raw_event);
-  let resolver = await getOrCreateResolver(
-    store,
-    event.node,
-    raw_event.address
-  );
-
-  let coinType = event.coinType;
-  if (resolver.coinTypes == null) {
-    resolver.coinTypes = [coinType.toString()];
-    await store.upsert(resolver);
-  } else {
-    let coinTypes = resolver.coinTypes!;
-    if (!coinTypes.includes(coinType.toString())) {
-      coinTypes.push(coinType.toString());
-      resolver.coinTypes = coinTypes;
-      await store.upsert(resolver);
-    }
-  }
+  await getOrCreateResolver(store, event.node, raw_event.address);
 }
 
 export async function handleNameChanged(
@@ -105,19 +88,6 @@ export async function handleTextChanged(
     raw_event.address
   );
 
-  let key = event.key;
-  if (resolver.texts == null) {
-    resolver.texts = [key];
-    await store.upsert(resolver);
-  } else {
-    let texts = resolver.texts!;
-    if (!texts.includes(key)) {
-      texts.push(key);
-      resolver.texts = texts;
-      await store.upsert(resolver);
-    }
-  }
-
   let resolverEvent = new TextChanged({ id: createEventID(block, raw_event) });
   resolverEvent.resolver = resolver;
   resolverEvent.blockNumber = block.height;
@@ -141,19 +111,6 @@ export async function handleTextChangedWithValue(
     event.node,
     raw_event.address
   );
-
-  let key = event.key;
-  if (resolver.texts == null) {
-    resolver.texts = [key];
-    await store.upsert(resolver);
-  } else {
-    let texts = resolver.texts!;
-    if (!texts.includes(key)) {
-      texts.push(key);
-      resolver.texts = texts;
-      await store.upsert(resolver);
-    }
-  }
 
   let resolverEvent = new TextChanged({ id: createEventID(block, raw_event) });
   resolverEvent.resolver = resolver;
@@ -200,7 +157,6 @@ export async function handleVersionChanged(
   );
   resolver.addr = null;
   resolver.contentHash = null;
-  resolver.texts = [];
   await store.upsert(resolver);
 }
 
@@ -215,8 +171,6 @@ async function getOrCreateResolver(
     resolver = new Resolver({ id });
     resolver.domain = await getDomain(store, node);
     resolver.address = address;
-    resolver.texts = [];
-    resolver.coinTypes = [];
     await store.insert(resolver);
   }
   return resolver;
