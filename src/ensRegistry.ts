@@ -187,10 +187,11 @@ export async function handleNewResolverOldRegistry(
 ): Promise<void> {
   let event = registry.events.NewResolver.decode(raw_event);
   let node = event.node;
-  let domain = (await getDomain(store, node, BigInt(block.timestamp)))!;
-  if (node == ROOT_NODE || domain.isMigrated == false) {
-    await handleNewResolver(store, raw_event);
-    return;
+  let domain = await getDomain(store, node, BigInt(block.timestamp));
+  if (domain) {
+    if (node == ROOT_NODE || domain.isMigrated == false) {
+      await handleNewResolver(store, raw_event);
+    }
   }
 }
 export async function handleNewTTLOldRegistry(
@@ -198,10 +199,11 @@ export async function handleNewTTLOldRegistry(
   raw_event: EvmLog
 ): Promise<void> {
   let event = registry.events.NewTTL.decode(raw_event);
-  let domain = (await getDomain(store, event.node))!;
-
-  if (domain.isMigrated == false) {
-    await handleNewTTL(store, raw_event);
+  let domain = await getDomain(store, event.node);
+  if (domain) {
+    if (domain.isMigrated == false) {
+      await handleNewTTL(store, raw_event);
+    }
   }
 }
 
@@ -210,8 +212,10 @@ export async function handleTransferOldRegistry(
   raw_event: EvmLog
 ): Promise<void> {
   let event = registry.events.Transfer.decode(raw_event);
-  let domain = (await getDomain(store, event.node))!;
-  if (domain.isMigrated == false) {
-    await handleTransfer(store, raw_event);
+  let domain = await getDomain(store, event.node);
+  if (domain) {
+    if (domain.isMigrated == false) {
+      await handleTransfer(store, raw_event);
+    }
   }
 }
