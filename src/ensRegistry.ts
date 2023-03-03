@@ -12,22 +12,6 @@ import {
 } from "./utils";
 import { keccak256 } from "ethers/lib/utils";
 
-async function createDomain(
-  store: Store,
-  node: string,
-  timestamp: bigint
-): Promise<Domain> {
-  let domain = new Domain({ id: node });
-  if (node == ROOT_NODE) {
-    domain = new Domain({ id: node });
-    domain.owner = await createOrLoadAccount(store, EMPTY_ADDRESS);
-    domain.isMigrated = true;
-    domain.createdAt = timestamp;
-    domain.subdomainCount = 0;
-  }
-  return domain;
-}
-
 export async function getDomain(
   store: Store,
   node: string,
@@ -35,10 +19,16 @@ export async function getDomain(
 ): Promise<Domain | undefined> {
   let domain = await store.get(Domain, node);
   if (domain == null && node == ROOT_NODE) {
-    return await createDomain(store, node, timestamp);
-  } else {
+    let domain = new Domain({
+      id: node,
+      isMigrated: true,
+      createdAt: timestamp,
+      subdomainCount: 0,
+    });
+    await store.insert(domain);
     return domain;
   }
+  return domain;
 }
 
 function makeSubnode(node: string, label: string): string {
@@ -55,8 +45,9 @@ async function _handleNewOwner(
   let account = await createOrLoadAccount(store, event.owner);
 
   let subnode = makeSubnode(event.node, event.label);
-  let domain = await getDomain(store, subnode, BigInt(block.timestamp));
   let parent = await getDomain(store, event.node);
+
+  let domain = await getDomain(store, subnode, BigInt(block.timestamp));
 
   if (domain == null) {
     domain = new Domain({ id: subnode });
