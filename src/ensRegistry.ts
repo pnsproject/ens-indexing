@@ -50,9 +50,13 @@ async function _handleNewOwner(
   let domain = await getDomain(store, subnode, BigInt(block.timestamp));
 
   if (domain == null) {
-    domain = new Domain({ id: subnode });
-    domain.createdAt = BigInt(block.timestamp);
-    domain.subdomainCount = 0;
+    domain = new Domain({
+      id: subnode,
+      createdAt: BigInt(block.timestamp),
+      subdomainCount: 0,
+      isMigrated,
+    });
+
     await store.insert(domain);
   }
 
