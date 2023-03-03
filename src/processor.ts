@@ -41,8 +41,6 @@ import {
 } from "./ethRegistrar";
 import { lookupArchive } from "@subsquid/archive-registry";
 
-const contractAddress =
-  "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85".toLowerCase();
 const processor = new EvmBatchProcessor()
   .setDataSource({
     chain: process.env.RPC_ENDPOINT,
@@ -178,7 +176,7 @@ const processor = new EvmBatchProcessor()
 processor.run(new TypeormDatabase(), async (ctx) => {
   for (let c of ctx.blocks) {
     for (let i of c.items) {
-      if (i.address === contractAddress && i.kind === "evmLog") {
+      if (i.kind === "evmLog") {
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
           if (isOld(i.address)) {
             await handleTransferOldRegistry(ctx.store, c.header, i.evmLog);
