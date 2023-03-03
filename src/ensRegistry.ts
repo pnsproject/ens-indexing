@@ -67,7 +67,7 @@ async function _handleNewOwner(
 
   if (domain.parent == null && parent != null) {
     parent.subdomainCount = parent.subdomainCount + 1;
-    await store.insert(parent);
+    await store.upsert(parent);
   }
 
   if (domain.name == null) {
