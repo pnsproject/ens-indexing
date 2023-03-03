@@ -85,10 +85,11 @@ async function _handleNewOwner(
     ) {
       domain.name = label;
     } else {
-      parent = parent!;
-      let name = parent.name;
-      if (label && name) {
-        domain.name = label + "." + name;
+      if (parent != null) {
+        let name = parent.name;
+        if (label && name) {
+          domain.name = label + "." + name;
+        }
       }
     }
   }
