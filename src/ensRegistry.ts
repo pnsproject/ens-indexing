@@ -21,6 +21,7 @@ export async function getDomain(
       id: node,
       createdAt: timestamp,
       subdomainCount: 0,
+      isMigrated: true,
     });
     await store.insert(domain);
     return domain;
