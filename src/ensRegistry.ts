@@ -182,8 +182,12 @@ export async function handleNewResolverOldRegistry(
   let event = registry.events.NewResolver.decode(raw_event);
   let node = event.node;
   let domain = (await getDomain(store, node, BigInt(block.timestamp)))!;
-  if (node == ROOT_NODE || !domain.isMigrated) {
+  if (node == ROOT_NODE) {
     await handleNewResolver(store, raw_event);
+  } else if (domain.isMigrated != null) {
+    if (!domain.isMigrated) {
+      await handleNewResolver(store, raw_event);
+    }
   }
 }
 export async function handleNewTTLOldRegistry(
