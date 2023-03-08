@@ -69,11 +69,10 @@ async function _handleNewOwner(
     let label = await nameByHash(store, event.label);
     if (label != null) {
       domain.labelName = label;
-    }
-
-    if (label == null) {
+    } else {
       label = "[" + event.label.slice(2) + "]";
     }
+
     if (
       event.node ==
       "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -82,7 +81,7 @@ async function _handleNewOwner(
     } else {
       if (parent) {
         let name = parent.name;
-        if (label && name) {
+        if (name) {
           domain.name = label + "." + name;
         }
       }
