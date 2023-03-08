@@ -1,5 +1,5 @@
-module.exports = class Data1677863128120 {
-    name = 'Data1677863128120'
+module.exports = class Data1678209857732 {
+    name = 'Data1678209857732'
 
     async up(db) {
         await db.query(`CREATE TABLE "registration" ("id" character varying NOT NULL, "registration_date" numeric NOT NULL, "expiry_date" numeric NOT NULL, "cost" numeric, "label_name" text, "domain_id" character varying NOT NULL, "registrant_id" character varying, CONSTRAINT "REL_a2348ea430f304b2835a86361b" UNIQUE ("domain_id"), CONSTRAINT "PK_cb23dc9d28df8801b15e9e2b8d6" PRIMARY KEY ("id"))`)
@@ -8,7 +8,7 @@ module.exports = class Data1677863128120 {
         await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "text_changed" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "transaction_id" bytea NOT NULL, "key" text NOT NULL, "value" text, "resolver_id" character varying, CONSTRAINT "PK_30f32979b0c77e4ba2ff120fc8c" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_12e6e6fe85b06c904ac19082b7" ON "text_changed" ("resolver_id") `)
-        await db.query(`CREATE TABLE "resolver" ("id" character varying NOT NULL, "address" text NOT NULL, "content_hash" text, "texts" text array, "x" text, "y" text, "name" text, "muiltcoin_address" text, "coin_types" text array, "domain_id" character varying, "addr_id" character varying, CONSTRAINT "PK_b6dce266610be08e8e81cd4d897" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "resolver" ("id" character varying NOT NULL, "address" text NOT NULL, "content_hash" text, "x" text, "y" text, "name" text, "muiltcoin_address" text, "domain_id" character varying, "addr_id" character varying, CONSTRAINT "PK_b6dce266610be08e8e81cd4d897" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2b8d86cb40182edda882e901f2" ON "resolver" ("domain_id") `)
         await db.query(`CREATE INDEX "IDX_0d373b33adb77b2f6f3c24ea77" ON "resolver" ("addr_id") `)
         await db.query(`CREATE TABLE "domain" ("id" character varying NOT NULL, "name" text, "label_name" text, "labelhash" text, "subdomain_count" integer NOT NULL, "ttl" numeric, "is_migrated" boolean NOT NULL, "created_at" numeric NOT NULL, "parent_id" character varying, "resolved_address_id" character varying, "owner_id" character varying, "resolver_id" character varying, CONSTRAINT "PK_27e3ec3ea0ae02c8c5bceab3ba9" PRIMARY KEY ("id"))`)

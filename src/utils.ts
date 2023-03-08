@@ -2,7 +2,7 @@
 import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { keccak256 } from "ethers/lib/utils";
-import { Account, Domain, Registration } from "./model";
+import { Account, Domain, ensNames, Registration } from "./model";
 import { boolean } from "./model/generated/marshal";
 
 export function createEventID(block: EvmBlock, raw_event: EvmLog): string {
@@ -104,13 +104,8 @@ export function checkValidLabel(name: string): boolean {
   for (let i = 0; i < name.length; i++) {
     let c = name.charCodeAt(i);
     if (c === 0) {
-      // log.warning("Invalid label '{}' contained null byte. Skipping.", [name]);
       return false;
     } else if (c === 46) {
-      // log.warning(
-      //   "Invalid label '{}' contained separator char '.'. Skipping.",
-      //   [name]
-      // );
       return false;
     }
   }
@@ -118,6 +113,13 @@ export function checkValidLabel(name: string): boolean {
   return true;
 }
 
-export function nameByHash(name: string): string {
-  return keccak256(new TextEncoder().encode(name));
+export async function nameByHash(
+  store: Store,
+  hash: string
+): Promise<string | null> {
+  let ensName = await store.get(ensNames, hash);
+  if (ensName == null) {
+    return null;
+  }
+  return ensName.name;
 }

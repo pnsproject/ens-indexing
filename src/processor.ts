@@ -4,7 +4,6 @@ import {
   EvmBatchProcessor,
   LogHandlerContext,
 } from "@subsquid/evm-processor";
-import { In } from "typeorm";
 import * as registrar from "./abi/BaseRegistrar";
 import * as controllerOld from "./abi/EthRegistrarControllerOld";
 import * as controller from "./abi/EthRegistrarController";
@@ -44,7 +43,7 @@ import { lookupArchive } from "@subsquid/archive-registry";
 const processor = new EvmBatchProcessor()
   .setDataSource({
     chain: process.env.RPC_ENDPOINT,
-    archive: lookupArchive("eth-mainnet"),
+    archive: "127.0.0.1:8080", //lookupArchive("eth-mainnet"),
   })
   .addLog("0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e", {
     filter: [
@@ -177,55 +176,67 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let c of ctx.blocks) {
     for (let i of c.items) {
       if (i.kind === "evmLog") {
+        ctx.log.debug("address: " + i.address);
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
+          ctx.log.debug("will handle transfer,address: " + i.address);
           if (isOld(i.address)) {
+            ctx.log.debug("is old");
             await handleTransferOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleTransfer(ctx.store, i.evmLog);
           }
-        } else if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {
+        }
+        if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {
+          ctx.log.debug("will handle newowner,address: " + i.address);
+
           if (isOld(i.address)) {
+            ctx.log.debug("is old");
             await handleNewOwnerOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewOwner(ctx.store, c.header, i.evmLog);
           }
-        } else if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
+        }
+        if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
+          ctx.log.debug("will handle newresolver,address: " + i.address);
+
           if (isOld(i.address)) {
+            ctx.log.debug("is old");
             await handleNewResolverOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewResolver(ctx.store, i.evmLog);
           }
-        } else if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {
+        }
+        if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {
+          ctx.log.debug("will handle new ttl,address: " + i.address);
+
           if (isOld(i.address)) {
+            ctx.log.debug("is old");
             await handleNewTTLOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleNewTTL(ctx.store, i.evmLog);
           }
-        } else if (
-          i.evmLog.topics[0] === publicResolver.events.AddrChanged.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === publicResolver.events.AddrChanged.topic) {
           await handleAddrChanged(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === publicResolver.events.AddressChanged.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === publicResolver.events.AddressChanged.topic) {
           await handleMulticoinAddrChanged(ctx.store, i.evmLog);
-        } else if (
+        }
+        if (
           i.evmLog.topics[0] === publicResolver.events.ContenthashChanged.topic
         ) {
           await handleContentHashChanged(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === publicResolver.events.NameChanged.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === publicResolver.events.NameChanged.topic) {
           await handleNameChanged(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === publicResolver.events.PubkeyChanged.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === publicResolver.events.PubkeyChanged.topic) {
           await handlePubkeyChanged(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === publicResolver.events.VersionChanged.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === publicResolver.events.VersionChanged.topic) {
           await handleVersionChanged(ctx.store, i.evmLog);
-        } else if (
+        }
+        if (
           i.evmLog.topics[0] ===
           publicResolver.events["TextChanged(bytes32,string,string)"].topic
         ) {
@@ -235,7 +246,8 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             i.evmLog,
             i.transaction.hash
           );
-        } else if (
+        }
+        if (
           i.evmLog.topics[0] ===
           publicResolver.events["TextChanged(bytes32,string,string,string)"]
             .topic
@@ -246,27 +258,26 @@ processor.run(new TypeormDatabase(), async (ctx) => {
             i.evmLog,
             i.transaction.hash
           );
-        } else if (
-          i.evmLog.topics[0] === registrar.events.NameRegistered.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === registrar.events.NameRegistered.topic) {
           await handleNameRegistered(ctx.store, c.header, i.evmLog);
-        } else if (i.evmLog.topics[0] === registrar.events.NameRenewed.topic) {
+        }
+        if (i.evmLog.topics[0] === registrar.events.NameRenewed.topic) {
           await handleNameRenewed(ctx.store, i.evmLog);
-        } else if (i.evmLog.topics[0] === registrar.events.Transfer.topic) {
-          await handleNameTransferred(ctx.store, c.header, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === controllerOld.events.NameRegistered.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === registrar.events.Transfer.topic) {
+          await handleNameTransferred(ctx.store, i.evmLog);
+        }
+        if (i.evmLog.topics[0] === controllerOld.events.NameRegistered.topic) {
           await handleNameRegisteredByControllerOld(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === controllerOld.events.NameRenewed.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === controllerOld.events.NameRenewed.topic) {
           await handleNameRenewedByController(ctx.store, i.evmLog);
-        } else if (
-          i.evmLog.topics[0] === controller.events.NameRegistered.topic
-        ) {
+        }
+        if (i.evmLog.topics[0] === controller.events.NameRegistered.topic) {
           await handleNameRegisteredByController(ctx.store, i.evmLog);
-        } else if (i.evmLog.topics[0] === controller.events.NameRenewed.topic) {
+        }
+        if (i.evmLog.topics[0] === controller.events.NameRenewed.topic) {
           await handleNameRenewedByController(ctx.store, i.evmLog);
         }
       }

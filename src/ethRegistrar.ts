@@ -5,7 +5,6 @@ import {
   checkValidLabel,
   concat,
   createOrLoadAccount,
-  createOrLoadDomain,
   createOrLoadRegistration,
   nameByHash,
   uint256ToByteArray,
@@ -47,12 +46,14 @@ export async function handleNameRegistered(
     registration.expiryDate = event.expires.toBigInt();
     registration.registrant = owner;
 
-    let labelName = nameByHash(label.toString());
+    let labelHash = label.toString();
+    let labelName = await nameByHash(store, labelHash);
     if (labelName != null) {
       domain.labelName = labelName;
       domain.name = labelName + ".eth";
       registration.labelName = labelName;
     }
+    domain.labelhash = labelHash;
     await store.upsert(domain);
     await store.upsert(registration);
   }
@@ -132,7 +133,6 @@ export async function handleNameRenewed(
 
 export async function handleNameTransferred(
   store: Store,
-  block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
   let event = registrar.events.Transfer.decode(raw_event);
