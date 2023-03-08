@@ -43,7 +43,7 @@ import { lookupArchive } from "@subsquid/archive-registry";
 const processor = new EvmBatchProcessor()
   .setDataSource({
     chain: process.env.RPC_ENDPOINT,
-    archive: "127.0.0.1:8080", //lookupArchive("eth-mainnet"),
+    archive: lookupArchive("eth-mainnet"),
   })
   .addLog("0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e", {
     filter: [
