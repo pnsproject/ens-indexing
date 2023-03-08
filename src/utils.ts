@@ -1,9 +1,7 @@
 // Import types and APIs from graph-ts
 import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { keccak256 } from "ethers/lib/utils";
 import { Account, Domain, ensNames, Registration } from "./model";
-import { boolean } from "./model/generated/marshal";
 
 export function createEventID(block: EvmBlock, raw_event: EvmLog): string {
   return block.height.toString().concat("-").concat(raw_event.index.toString());
@@ -117,7 +115,7 @@ export async function nameByHash(
   store: Store,
   hash: string
 ): Promise<string | null> {
-  let ensName = await store.get(ensNames, hash);
+  let ensName = await store.findOne(ensNames, { where: { hash: hash } });
   if (ensName == null) {
     return null;
   }
