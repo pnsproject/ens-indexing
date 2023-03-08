@@ -7,6 +7,7 @@ import {
   ROOT_NODE,
   concat,
   byteArrayFromHex,
+  nameByHash,
 } from "./utils";
 import { keccak256 } from "ethers/lib/utils";
 
@@ -65,7 +66,7 @@ async function _handleNewOwner(
 
   if (domain.name == null) {
     // Get label and node names
-    let label = keccak256(new TextEncoder().encode(event.label));
+    let label = await nameByHash(store, event.label);
     if (label != null) {
       domain.labelName = label;
     }
