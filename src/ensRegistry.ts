@@ -37,17 +37,15 @@ function makeSubnode(node: string, label: string): string {
 async function _handleNewOwner(
   store: Store,
   block: EvmBlock,
-  event: [node: string, label: string, owner: string] & {
-    node: string;
-    label: string;
-    owner: string;
-  },
+  node: string,
+  label: string,
+  owner: string,
   isMigrated: boolean
 ): Promise<void> {
-  let account = await createOrLoadAccount(store, event.owner);
+  let account = await createOrLoadAccount(store, owner);
 
-  let subnode = makeSubnode(event.node, event.label);
-  let parent = await getDomain(store, event.node);
+  let subnode = makeSubnode(node, label);
+  let parent = await getDomain(store, node);
 
   let domain = await getDomain(store, subnode, BigInt(block.timestamp));
 
@@ -69,23 +67,23 @@ async function _handleNewOwner(
 
   if (domain.name == null) {
     // Get label and node names
-    let label = await nameByHash(store, event.label);
-    if (label != null) {
+    let real_label = await nameByHash(store, label);
+    if (real_label != null) {
       domain.labelName = label;
     } else {
-      label = "[" + event.label.slice(2) + "]";
+      real_label = "[" + label.slice(2) + "]";
     }
 
     if (
-      event.node ==
+      node ==
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     ) {
-      domain.name = label;
+      domain.name = real_label;
     } else {
       if (parent) {
         let name = parent.name;
         if (name) {
-          domain.name = label + "." + name;
+          domain.name = real_label + "." + name;
         }
       }
     }
@@ -93,7 +91,7 @@ async function _handleNewOwner(
 
   domain.owner = account;
   domain.parent = parent;
-  domain.labelhash = event.label;
+  domain.labelhash = label;
   domain.isMigrated = isMigrated;
   await store.upsert(domain);
 }
@@ -162,7 +160,14 @@ export async function handleNewOwner(
 ): Promise<void> {
   let event = registry.events.NewOwner.decode(raw_event);
 
-  await _handleNewOwner(store, block, event, true);
+  await _handleNewOwner(
+    store,
+    block,
+    event.node,
+    event.label,
+    event.owner,
+    true
+  );
 }
 
 export async function handleNewOwnerOldRegistry(
@@ -176,12 +181,25 @@ export async function handleNewOwnerOldRegistry(
   let domain = await getDomain(store, subnode);
 
   if (domain == null) {
-    await _handleNewOwner(store, block, event, false);
-    return;
-  }
-
-  if (domain.isMigrated == false) {
-    await _handleNewOwner(store, block, event, false);
+    await _handleNewOwner(
+      store,
+      block,
+      event.node,
+      event.label,
+      event.owner,
+      false
+    );
+  } else {
+    if (domain.isMigrated == false) {
+      await _handleNewOwner(
+        store,
+        block,
+        event.node,
+        event.label,
+        event.owner,
+        false
+      );
+    }
   }
 }
 

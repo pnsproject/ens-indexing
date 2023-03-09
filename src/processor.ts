@@ -176,41 +176,41 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let c of ctx.blocks) {
     for (let i of c.items) {
       if (i.kind === "evmLog") {
-        ctx.log.debug("address: " + i.address);
+        ctx.log.info("address: " + i.address);
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
-          ctx.log.debug("will handle transfer,address: " + i.address);
+          ctx.log.info("will handle transfer,address: " + i.address);
           if (isOld(i.address)) {
-            ctx.log.debug("is old");
+            ctx.log.info("is old");
             await handleTransferOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleTransfer(ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {
-          ctx.log.debug("will handle newowner,address: " + i.address);
+          ctx.log.info("will handle newowner,address: " + i.address);
 
           if (isOld(i.address)) {
-            ctx.log.debug("is old");
+            ctx.log.info("is old");
             await handleNewOwnerOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewOwner(ctx.store, c.header, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
-          ctx.log.debug("will handle newresolver,address: " + i.address);
+          ctx.log.info("will handle newresolver,address: " + i.address);
 
           if (isOld(i.address)) {
-            ctx.log.debug("is old");
+            ctx.log.info("is old");
             await handleNewResolverOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewResolver(ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {
-          ctx.log.debug("will handle new ttl,address: " + i.address);
+          ctx.log.info("will handle new ttl,address: " + i.address);
 
           if (isOld(i.address)) {
-            ctx.log.debug("is old");
+            ctx.log.info("is old");
             await handleNewTTLOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleNewTTL(ctx.store, i.evmLog);
