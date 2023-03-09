@@ -190,7 +190,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           ctx.log.info("will handle newowner,address: " + i.address);
 
           if (isOld(i.address)) {
-            ctx.log.info("is old");
+            ctx.log.info(i.evmLog);
             await handleNewOwnerOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewOwner(ctx.store, c.header, i.evmLog);
