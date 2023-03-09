@@ -37,10 +37,13 @@ function makeSubnode(node: string, label: string): string {
 async function _handleNewOwner(
   store: Store,
   block: EvmBlock,
-  raw_event: EvmLog,
+  event: [node: string, label: string, owner: string] & {
+    node: string;
+    label: string;
+    owner: string;
+  },
   isMigrated: boolean
 ): Promise<void> {
-  let event = registry.events.NewOwner.decode(raw_event);
   let account = await createOrLoadAccount(store, event.owner);
 
   let subnode = makeSubnode(event.node, event.label);
@@ -157,7 +160,9 @@ export async function handleNewOwner(
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  await _handleNewOwner(store, block, raw_event, true);
+  let event = registry.events.NewOwner.decode(raw_event);
+
+  await _handleNewOwner(store, block, event, true);
 }
 
 export async function handleNewOwnerOldRegistry(
@@ -171,12 +176,12 @@ export async function handleNewOwnerOldRegistry(
   let domain = await getDomain(store, subnode);
 
   if (domain == null) {
-    await _handleNewOwner(store, block, raw_event, false);
+    await _handleNewOwner(store, block, event, false);
     return;
   }
 
   if (domain.isMigrated == false) {
-    await _handleNewOwner(store, block, raw_event, false);
+    await _handleNewOwner(store, block, event, false);
   }
 }
 
