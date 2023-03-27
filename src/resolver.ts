@@ -5,9 +5,12 @@ import {
   createEventID,
   createOrLoadAccount,
   createOrLoadDomain,
+  tryDecode,
 } from "./utils";
 import * as publicResolver from "./abi/PublicResolver";
 import { getDomain } from "./ensRegistry";
+import { Logger } from "@subsquid/logger";
+
 
 export async function handleAddrChanged(
   store: Store,
@@ -73,15 +76,19 @@ export async function handlePubkeyChanged(
 }
 
 export async function handleTextChanged(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog,
   transactionHash: string
 ): Promise<void> {
   let event =
-    publicResolver.events["TextChanged(bytes32,string,string)"].decode(
-      raw_event
-    );
+    tryDecode(log, publicResolver.events["TextChanged(bytes32,string,string)"], raw_event);
+
+  if (event == null) {
+    return;
+  }
+
   let resolver = await getOrCreateResolver(
     store,
     event.node,

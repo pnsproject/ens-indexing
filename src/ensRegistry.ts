@@ -2,6 +2,8 @@ import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { Domain, Resolver } from "./model";
 import * as registry from "./abi/Registry";
+import * as fixedRegistry from "./abi/FixedRegistry";
+
 import {
   createOrLoadAccount,
   ROOT_NODE,
@@ -11,7 +13,7 @@ import {
 } from "./utils";
 import { keccak256 } from "ethers/lib/utils";
 import { LogEvent } from "./abi/abi.support";
-import { ethers } from "ethers";
+
 
 export async function getDomain(
   store: Store,
@@ -160,36 +162,32 @@ export async function handleNewOwner(
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = events.FixedNewOwner.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic ) {
+    raw_event.topics[0] = fixedRegistry.events.NewOwner.topic
+  }  
+  let event = fixedRegistry.events.NewOwner.decode(raw_event);
 
   await _handleNewOwner(
     store,
     block,
     event.node,
     event.label,
-    event.owner.toHexString(),
+    event.owner._hex,
     true
   );
 }
-const events = {
-  FixedNewOwner: new LogEvent<
-    [node: string, label: string, owner: ethers.BigNumber] & {
-      node: string;
-      label: string;
-      owner: ethers.BigNumber;
-    }
-  >(
-    registry.abi,
-    "0xce0457fe73731f824cc272376169235128c118b49d344817417c6d108d155e82"
-  ),
-};
+
 
 export async function handleNewOwnerOldRegistry(
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = events.FixedNewOwner.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic ) {
+    raw_event.topics[0] = fixedRegistry.events.NewOwner.topic
+  }  
+
+  let event = fixedRegistry.events.NewOwner.decode(raw_event);
 
   let subnode = makeSubnode(event.node, event.label);
   let domain = await getDomain(store, subnode);
@@ -200,7 +198,7 @@ export async function handleNewOwnerOldRegistry(
       block,
       event.node,
       event.label,
-      event.owner.toHexString(),
+      event.owner._hex,
       false
     );
   } else {
@@ -210,7 +208,7 @@ export async function handleNewOwnerOldRegistry(
         block,
         event.node,
         event.label,
-        event.owner.toHexString(),
+        event.owner._hex,
         false
       );
     }
@@ -256,3 +254,4 @@ export async function handleTransferOldRegistry(
     }
   }
 }
+
