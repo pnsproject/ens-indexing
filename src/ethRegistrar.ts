@@ -14,7 +14,7 @@ import * as controllerOld from "./abi/EthRegistrarControllerOld";
 import * as controller from "./abi/EthRegistrarController";
 import { Logger } from "@subsquid/logger";
 
-import { keccak256 } from "ethers/lib/utils";
+import { keccak256, namehash } from "ethers/lib/utils";
 import { Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
 
@@ -113,7 +113,7 @@ async function setNamePreimage(
     return;
   }
 
-  let domainId = keccak256(concat(rootNode, byteArrayFromHex(label)));
+  let domainId = namehash(name + '.eth');
   log.info(`set domain id: ${domainId}`);
 
   let domain = await getDomain(
