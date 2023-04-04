@@ -140,7 +140,15 @@ export async function handleNewResolver(
     domain.resolvedAddress = resolver.addr;
   }
   log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
-  domain.resolver = resolver;
+  if (domain.resolver) {
+    // 如果 domain.resolver 已定义，则将 resolver 分配给它
+    domain.resolver = resolver;
+  } else {
+    // 如果 domain.resolver 未定义，则创建一个新的 Resolver 对象
+    domain.resolver = null;
+    log.info(`domain.resolver: ${JSON.stringify(domain.resolver)}`);
+    domain.resolver = resolver;
+  }
   await store.upsert(domain);
 }
 
