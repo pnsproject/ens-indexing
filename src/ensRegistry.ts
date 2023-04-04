@@ -11,6 +11,7 @@ import {
   concat,
   byteArrayFromHex,
   nameByHash,
+  createDomain,
 } from "./utils";
 import { keccak256 } from "ethers/lib/utils";
 import { LogEvent } from "./abi/abi.support";
@@ -23,7 +24,7 @@ export async function getDomain(
 ): Promise<Domain | undefined> {
   let domain = await store.get(Domain, node);
   if (domain == null && node == ROOT_NODE) {
-    let domain = new Domain({
+    let domain = createDomain({
       id: node,
       createdAt: timestamp,
       subdomainCount: 0,
@@ -55,7 +56,7 @@ async function _handleNewOwner(
   let domain = await getDomain(store, subnode, BigInt(block.timestamp));
 
   if (domain == null) {
-    domain = new Domain({
+    domain = createDomain({
       id: subnode,
       createdAt: BigInt(block.timestamp),
       subdomainCount: 0,

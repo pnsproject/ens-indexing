@@ -64,7 +64,7 @@ export async function createOrLoadDomain(
 ): Promise<Domain> {
   let domain = await store.get(Domain, node);
   if (domain == null) {
-    domain = new Domain({
+    domain = createDomain({
       id: node,
       subdomainCount: 0,
       owner,
@@ -141,4 +141,24 @@ export async function insertOrUpsert<E extends Entity>(store: Store, entityClass
   } else {
     await store.upsert(entity);
   }
+}
+
+export function createDomain(props: Partial<Domain> = {}): Domain {
+  const domain = new Domain();
+
+  domain.id = props.id || '';
+  domain.name = props.name || null;
+  domain.labelName = props.labelName || null;
+  domain.labelhash = props.labelhash || null;
+  domain.parent = props.parent || null;
+  domain.subdomains = props.subdomains || [];
+  domain.subdomainCount = props.subdomainCount || 0;
+  domain.resolvedAddress = props.resolvedAddress || null;
+  domain.owner = props.owner || new Account();
+  domain.resolver = props.resolver || null;
+  domain.ttl = props.ttl || null;
+  domain.isMigrated = props.isMigrated || false;
+  domain.createdAt = props.createdAt || BigInt(0);
+
+  return domain;
 }
