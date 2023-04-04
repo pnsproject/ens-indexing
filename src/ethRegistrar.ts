@@ -15,7 +15,7 @@ import * as controller from "./abi/EthRegistrarController";
 import { Logger } from "@subsquid/logger";
 
 import { keccak256 } from "ethers/lib/utils";
-import { Registration } from "./model";
+import { Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
 
 var rootNode: Uint8Array = byteArrayFromHex(
@@ -23,6 +23,7 @@ var rootNode: Uint8Array = byteArrayFromHex(
 );
 
 export async function handleNameRegistered(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog
@@ -31,7 +32,9 @@ export async function handleNameRegistered(
   let owner = await createOrLoadAccount(store, event.owner);
 
   let label = uint256ToByteArray(event.id.toBigInt());
-  let domain = await getDomain(store, keccak256(concat(rootNode, label)));
+  let domainId = keccak256(concat(rootNode, label));
+  log.info(`handle name registered ${domainId} ${event.id}`);
+  let domain = await getDomain(store, domainId);
   if (domain) {
     let registration = await createOrLoadRegistration(
       store,
@@ -110,7 +113,7 @@ async function setNamePreimage(
     return;
   }
 
-  let domainId = keccak256(concat(rootNode, new TextEncoder().encode(label)));
+  let domainId = keccak256(concat(rootNode, uint256ToByteArray(BigInt(label))));
   log.info(`set domain id: ${domainId}`);
 
   let domain = await getDomain(

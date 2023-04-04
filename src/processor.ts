@@ -250,7 +250,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           );
         }
         if (i.evmLog.topics[0] === registrar.events.NameRegistered.topic) {
-          await handleNameRegistered(ctx.store, c.header, i.evmLog);
+          await handleNameRegistered(ctx.log, ctx.store, c.header, i.evmLog);
         }
         if (i.evmLog.topics[0] === registrar.events.NameRenewed.topic) {
           await handleNameRenewed(ctx.store, i.evmLog);
