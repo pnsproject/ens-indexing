@@ -137,7 +137,9 @@ export async function handleNewResolver(
   } else {
     domain.resolvedAddress = resolver.addr;
   }
-  domain.resolver = resolver!;
+  if (resolver) {
+    domain.resolver = resolver;
+  }
   await store.upsert(domain);
 }
 
