@@ -139,7 +139,7 @@ export async function handleNewResolver(
   } else {
     domain.resolvedAddress = resolver.addr;
   }
-  log.info(`handleNewResolver: ${resolver}`);
+  log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
   domain.resolver = resolver;
   await store.upsert(domain);
 }
