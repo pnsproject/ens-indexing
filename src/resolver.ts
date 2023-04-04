@@ -5,6 +5,7 @@ import {
   createEventID,
   createOrLoadAccount,
   createOrLoadDomain,
+  insertOrUpsert,
   tryDecode,
 } from "./utils";
 import * as publicResolver from "./abi/PublicResolver";
@@ -108,7 +109,8 @@ export async function handleTextChanged(
   resolverEvent.blockNumber = block.height;
   resolverEvent.transactionID = new TextEncoder().encode(transactionHash);
   resolverEvent.key = event.key;
-  await store.insert(resolverEvent);
+
+  await insertOrUpsert(store, TextChanged, resolverEvent);
 }
 
 export async function handleTextChangedWithValue(
@@ -132,7 +134,8 @@ export async function handleTextChangedWithValue(
   resolverEvent.transactionID = new TextEncoder().encode(transactionHash);
   resolverEvent.key = event.key;
   resolverEvent.value = event.value;
-  await store.insert(resolverEvent);
+
+  await insertOrUpsert(store, TextChanged, resolverEvent);
 }
 
 export async function handleContentHashChanged(

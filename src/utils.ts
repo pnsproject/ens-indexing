@@ -1,6 +1,6 @@
 // Import types and APIs from graph-ts
 import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
-import { Store } from "@subsquid/typeorm-store";
+import { Entity, EntityClass, Store } from "@subsquid/typeorm-store";
 import { LogEvent, LogRecord } from "./abi/abi.support";
 import { Account, Domain, ensNames, Registration } from "./model";
 import { Logger } from "@subsquid/logger";
@@ -131,5 +131,14 @@ export function tryDecode<Args>(log: Logger, event: LogEvent<Args>, rec: LogReco
   } catch (error) {
     log.error(`An error occurred while ${event} decoding ${rec}: ${error}`);
     return null;
+  }
+}
+
+export async function insertOrUpsert<E extends Entity>(store: Store, entityClass: EntityClass<E>, entity: E): Promise<void> {
+  let e = await store.get(entityClass, entity.id);
+  if (e == null) {
+    await store.insert(entity);
+  } else {
+    await store.upsert(entity);
   }
 }

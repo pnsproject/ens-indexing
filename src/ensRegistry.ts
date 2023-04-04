@@ -162,9 +162,9 @@ export async function handleNewOwner(
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic ) {
+  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic) {
     raw_event.topics[0] = fixedRegistry.events.NewOwner.topic
-  }  
+  }
   let event = fixedRegistry.events.NewOwner.decode(raw_event);
 
   await _handleNewOwner(
@@ -183,9 +183,9 @@ export async function handleNewOwnerOldRegistry(
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic ) {
+  if (raw_event.topics[0] != fixedRegistry.events.NewOwner.topic) {
     raw_event.topics[0] = fixedRegistry.events.NewOwner.topic
-  }  
+  }
 
   let event = fixedRegistry.events.NewOwner.decode(raw_event);
 
