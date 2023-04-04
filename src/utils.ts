@@ -129,7 +129,7 @@ export function tryDecode<Args>(log: Logger, event: LogEvent<Args>, rec: LogReco
   try {
     return event.decode(rec);
   } catch (error) {
-    log.error(`An error occurred while ${event} decoding ${rec}: ${error}`);
+    log.error(`An error occurred while ${event.topic} decoding ${rec.data} ${rec.topics}: ${error}`);
     return null;
   }
 }
