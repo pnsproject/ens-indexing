@@ -113,7 +113,7 @@ async function setNamePreimage(
     return;
   }
 
-  let domainId = keccak256(concat(rootNode, uint256ToByteArray(BigInt(label))));
+  let domainId = keccak256(concat(rootNode, byteArrayFromHex(label)));
   log.info(`set domain id: ${domainId}`);
 
   let domain = await getDomain(
