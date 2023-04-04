@@ -192,9 +192,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         }
         if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
           if (isOld(i.address)) {
-            await handleNewResolverOldRegistry(ctx.store, c.header, i.evmLog);
+            await handleNewResolverOldRegistry(ctx.log, ctx.store, c.header, i.evmLog);
           } else {
-            await handleNewResolver(ctx.store, i.evmLog);
+            await handleNewResolver(ctx.log, ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {

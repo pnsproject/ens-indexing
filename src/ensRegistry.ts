@@ -3,6 +3,7 @@ import { Store } from "@subsquid/typeorm-store";
 import { Domain, Resolver } from "./model";
 import * as registry from "./abi/Registry";
 import * as fixedRegistry from "./abi/FixedRegistry";
+import { Logger } from "@subsquid/logger";
 
 import {
   createOrLoadAccount,
@@ -118,6 +119,7 @@ export async function handleTransfer(
 
 // Handler for NewResolver events
 export async function handleNewResolver(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
@@ -137,9 +139,8 @@ export async function handleNewResolver(
   } else {
     domain.resolvedAddress = resolver.addr;
   }
-  if (resolver) {
-    domain.resolver = resolver;
-  }
+  log.info(`handleNewResolver: ${resolver}`);
+  domain.resolver = resolver;
   await store.upsert(domain);
 }
 
@@ -218,6 +219,7 @@ export async function handleNewOwnerOldRegistry(
 }
 
 export async function handleNewResolverOldRegistry(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog
@@ -227,7 +229,7 @@ export async function handleNewResolverOldRegistry(
   let domain = await getDomain(store, node, BigInt(block.timestamp));
   if (domain) {
     if (node == ROOT_NODE || domain.isMigrated == false) {
-      await handleNewResolver(store, raw_event);
+      await handleNewResolver(log, store, raw_event);
     }
   }
 }
