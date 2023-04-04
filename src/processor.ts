@@ -259,16 +259,16 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await handleNameTransferred(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controllerOld.events.NameRegistered.topic) {
-          await handleNameRegisteredByControllerOld(ctx.store, i.evmLog);
+          await handleNameRegisteredByControllerOld(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controllerOld.events.NameRenewed.topic) {
-          await handleNameRenewedByController(ctx.store, i.evmLog);
+          await handleNameRenewedByController(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controller.events.NameRegistered.topic) {
-          await handleNameRegisteredByController(ctx.store, i.evmLog);
+          await handleNameRegisteredByController(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controller.events.NameRenewed.topic) {
-          await handleNameRenewedByController(ctx.store, i.evmLog);
+          await handleNameRenewedByController(ctx.log, ctx.store, i.evmLog);
         }
       }
     }

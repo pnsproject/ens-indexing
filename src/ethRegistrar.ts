@@ -12,6 +12,7 @@ import {
 import * as registrar from "./abi/BaseRegistrar";
 import * as controllerOld from "./abi/EthRegistrarControllerOld";
 import * as controller from "./abi/EthRegistrarController";
+import { Logger } from "@subsquid/logger";
 
 import { keccak256 } from "ethers/lib/utils";
 import { Registration } from "./model";
@@ -60,19 +61,24 @@ export async function handleNameRegistered(
 }
 
 export async function handleNameRegisteredByControllerOld(
+  log: Logger,
+
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
   let event = controllerOld.events.NameRegistered.decode(raw_event);
-  await setNamePreimage(store, event.name, event.label, event.cost.toBigInt());
+  await setNamePreimage(log, store, event.name, event.label, event.cost.toBigInt());
 }
 
 export async function handleNameRegisteredByController(
+  log: Logger,
+
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
   let event = controller.events.NameRegistered.decode(raw_event);
   await setNamePreimage(
+    log,
     store,
     event.name,
     event.label,
@@ -81,20 +87,25 @@ export async function handleNameRegisteredByController(
 }
 
 export async function handleNameRenewedByController(
+  log: Logger,
+
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
   let event = controller.events.NameRenewed.decode(raw_event);
 
-  await setNamePreimage(store, event.name, event.label, event.cost.toBigInt());
+  await setNamePreimage(log, store, event.name, event.label, event.cost.toBigInt());
 }
 
 async function setNamePreimage(
+  log: Logger,
   store: Store,
   name: string,
   label: string,
   cost: bigint
 ): Promise<void> {
+  log.info(`set name preimage: ${name} ${label}`);
+
   if (!checkValidLabel(name)) {
     return;
   }
