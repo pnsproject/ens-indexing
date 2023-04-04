@@ -110,16 +110,24 @@ async function setNamePreimage(
     return;
   }
 
+  let domainId = keccak256(concat(rootNode, new TextEncoder().encode(label)));
+  log.info(`set domain id: ${domainId}`);
+
   let domain = await getDomain(
     store,
-    keccak256(concat(rootNode, new TextEncoder().encode(label)))
+    domainId
   );
+
   if (domain) {
     if (domain.labelName !== name) {
       domain.labelName = name;
       domain.name = name + ".eth";
       await store.upsert(domain);
+    } else {
+      log.info(`label name is same: ${domain.labelName}`);
     }
+  } else {
+    log.info(`domain not found: ${domainId} ${name}`);
   }
 
   let registration = await store.get(Registration, label);
