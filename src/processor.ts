@@ -176,85 +176,58 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   for (let c of ctx.blocks) {
     for (let i of c.items) {
       if (i.kind === "evmLog") {
-        ctx.log.info("address: " + i.address);
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
-          ctx.log.info("will handle transfer,address: " + i.address);
           if (isOld(i.address)) {
-            ctx.log.info("is old");
             await handleTransferOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleTransfer(ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {
-          ctx.log.info("will handle newowner,address: " + i.address);
-
           if (isOld(i.address)) {
-            ctx.log.info(i.evmLog);
             await handleNewOwnerOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewOwner(ctx.store, c.header, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
-          ctx.log.info("will handle newresolver,address: " + i.address);
-
           if (isOld(i.address)) {
-            ctx.log.info("is old");
             await handleNewResolverOldRegistry(ctx.store, c.header, i.evmLog);
           } else {
             await handleNewResolver(ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewTTL.topic) {
-          ctx.log.info("will handle new ttl,address: " + i.address);
-
           if (isOld(i.address)) {
-            ctx.log.info("is old");
             await handleNewTTLOldRegistry(ctx.store, i.evmLog);
           } else {
             await handleNewTTL(ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === publicResolver.events.AddrChanged.topic) {
-          ctx.log.info("will handle addr changed,address: " + i.address);
-
-          await handleAddrChanged(ctx.store, i.evmLog);
+          await handleAddrChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === publicResolver.events.AddressChanged.topic) {
-          ctx.log.info("will handle address changed,address: " + i.address);
-
-          await handleMulticoinAddrChanged(ctx.store, i.evmLog);
+          await handleMulticoinAddrChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (
           i.evmLog.topics[0] === publicResolver.events.ContenthashChanged.topic
         ) {
-          ctx.log.info("will handle contenthash changed ttl,address: " + i.address);
-
-          await handleContentHashChanged(ctx.store, i.evmLog);
+          await handleContentHashChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === publicResolver.events.NameChanged.topic) {
-          ctx.log.info("will handle name changed,address: " + i.address);
-
-          await handleNameChanged(ctx.store, i.evmLog);
+          await handleNameChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === publicResolver.events.PubkeyChanged.topic) {
-          ctx.log.info("will handle pubkey changed,address: " + i.address);
-
-          await handlePubkeyChanged(ctx.store, i.evmLog);
+          await handlePubkeyChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === publicResolver.events.VersionChanged.topic) {
-          ctx.log.info("will handle version changed,address: " + i.address);
-
-          await handleVersionChanged(ctx.store, i.evmLog);
+          await handleVersionChanged(ctx.log, ctx.store, i.evmLog);
         }
         if (
           i.evmLog.topics[0] ===
           publicResolver.events["TextChanged(bytes32,string,string)"].topic
         ) {
-          ctx.log.info("will handle text changed 3,address: " + i.address);
-          ctx.log.info(i.evmLog);
-
           await handleTextChanged(
             ctx.log,
             ctx.store,
@@ -268,9 +241,8 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           publicResolver.events["TextChanged(bytes32,string,string,string)"]
             .topic
         ) {
-          ctx.log.info("will handle text changed 4,address: " + i.address);
-
           await handleTextChangedWithValue(
+            ctx.log,
             ctx.store,
             c.header,
             i.evmLog,
@@ -278,38 +250,24 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           );
         }
         if (i.evmLog.topics[0] === registrar.events.NameRegistered.topic) {
-          ctx.log.info("will handle name registered,address: " + i.address);
-
           await handleNameRegistered(ctx.store, c.header, i.evmLog);
         }
         if (i.evmLog.topics[0] === registrar.events.NameRenewed.topic) {
-          ctx.log.info("will handle name renewed,address: " + i.address);
-
           await handleNameRenewed(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === registrar.events.Transfer.topic) {
-          ctx.log.info("will handle transfer,address: " + i.address);
-
           await handleNameTransferred(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controllerOld.events.NameRegistered.topic) {
-          ctx.log.info("will handle name registered by controller old,address: " + i.address);
-
           await handleNameRegisteredByControllerOld(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controllerOld.events.NameRenewed.topic) {
-          ctx.log.info("will handleNameRenewedByController,address: " + i.address);
-
           await handleNameRenewedByController(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controller.events.NameRegistered.topic) {
-          ctx.log.info("will handleNameRegisteredByController,address: " + i.address);
-
           await handleNameRegisteredByController(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controller.events.NameRenewed.topic) {
-          ctx.log.info("will handleNameRenewedByController,address: " + i.address);
-
           await handleNameRenewedByController(ctx.store, i.evmLog);
         }
       }

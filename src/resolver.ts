@@ -13,10 +13,13 @@ import { Logger } from "@subsquid/logger";
 
 
 export async function handleAddrChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.AddrChanged.decode(raw_event);
+  let event = tryDecode(log, publicResolver.events.AddrChanged, raw_event);
+  if (event == null) return;
+
   let account = await createOrLoadAccount(store, event.a);
 
   let resolver = await getOrCreateResolver(
@@ -37,19 +40,22 @@ export async function handleAddrChanged(
 }
 
 export async function handleMulticoinAddrChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.AddressChanged.decode(raw_event);
+  let event = tryDecode(log, publicResolver.events.AddressChanged, raw_event);
+  if (event == null) return;
   await getOrCreateResolver(store, event.node, raw_event.address);
 }
 
 export async function handleNameChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.NameChanged.decode(raw_event);
-
+  let event = tryDecode(log, publicResolver.events.NameChanged, raw_event);
+  if (event == null) return;
   if (event.name.indexOf("\u0000") != -1) return;
   let resolver = await getOrCreateResolver(
     store,
@@ -61,10 +67,12 @@ export async function handleNameChanged(
 }
 
 export async function handlePubkeyChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.PubkeyChanged.decode(raw_event);
+  let event = tryDecode(log, publicResolver.events.PubkeyChanged, raw_event);
+  if (event == null) return;
   let resolver = await getOrCreateResolver(
     store,
     event.node,
@@ -104,15 +112,14 @@ export async function handleTextChanged(
 }
 
 export async function handleTextChangedWithValue(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog,
   transactionHash: string
 ): Promise<void> {
-  let event =
-    publicResolver.events["TextChanged(bytes32,string,string,string)"].decode(
-      raw_event
-    );
+  let event = tryDecode(log, publicResolver.events["TextChanged(bytes32,string,string,string)"], raw_event);
+  if (event == null) return;
   let resolver = await getOrCreateResolver(
     store,
     event.node,
@@ -129,10 +136,16 @@ export async function handleTextChangedWithValue(
 }
 
 export async function handleContentHashChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.ContenthashChanged.decode(raw_event);
+  let event =
+    tryDecode(log, publicResolver.events.ContenthashChanged, raw_event);
+
+  if (event == null) {
+    return;
+  }
   let resolver = await getOrCreateResolver(
     store,
     event.node,
@@ -143,11 +156,16 @@ export async function handleContentHashChanged(
 }
 
 export async function handleVersionChanged(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = publicResolver.events.VersionChanged.decode(raw_event);
+  let event =
+    tryDecode(log, publicResolver.events.VersionChanged, raw_event);
 
+  if (event == null) {
+    return;
+  }
   let domain = await getDomain(store, event.node);
   if (
     domain &&

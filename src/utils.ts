@@ -3,7 +3,7 @@ import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { LogEvent, LogRecord } from "./abi/abi.support";
 import { Account, Domain, ensNames, Registration } from "./model";
-import {Logger} from "@subsquid/logger";
+import { Logger } from "@subsquid/logger";
 
 export function createEventID(block: EvmBlock, raw_event: EvmLog): string {
   return block.height.toString().concat("-").concat(raw_event.index.toString());
@@ -125,11 +125,11 @@ export async function nameByHash(
 }
 
 
-export function tryDecode<Args>(log: Logger,event: LogEvent<Args>,rec: LogRecord): Args|null {
+export function tryDecode<Args>(log: Logger, event: LogEvent<Args>, rec: LogRecord): Args | null {
   try {
     return event.decode(rec);
   } catch (error) {
-    log.error('An error occurred while decoding:' + error);
+    log.error(`An error occurred while ${event} decoding ${rec}: ${error}`);
     return null;
   }
 }
