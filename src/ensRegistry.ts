@@ -132,7 +132,12 @@ export async function handleNewResolver(
   let id = event.resolver.concat("-").concat(event.node);
 
   let node = event.node;
-  let domain = (await getDomain(store, node))!;
+  let domain = await getDomain(store, node);
+
+  if (domain == null) {
+    log.info(`not found domain for ${node}`);
+    return;
+  }
 
   let resolver = await store.get(Resolver, id);
   if (resolver == null) {
