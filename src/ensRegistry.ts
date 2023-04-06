@@ -41,6 +41,7 @@ function makeSubnode(node: string, label: string): string {
 }
 // Handler for NewOwner events
 async function _handleNewOwner(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   node: string,
@@ -73,7 +74,7 @@ async function _handleNewOwner(
 
   if (domain.name == null) {
     // Get label and node names
-    let real_label = await nameByHash(store, label);
+    let real_label = await nameByHash(log, store, label);
     if (real_label != null) {
       domain.labelName = label;
     } else {
@@ -141,15 +142,12 @@ export async function handleNewResolver(
     domain.resolvedAddress = resolver.addr;
   }
   log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
-  if (domain.resolver) {
-    // 如果 domain.resolver 已定义，则将 resolver 分配给它
+  try {
     domain.resolver = resolver;
-  } else {
-    // 如果 domain.resolver 未定义，则创建一个新的 Resolver 对象
-    domain.resolver = null;
-    log.info(`domain.resolver: ${JSON.stringify(domain.resolver)}`);
-    domain.resolver = resolver;
+  } catch (e) {
+    log.error(`set domain resolver: ${e}`);
   }
+
   await store.upsert(domain);
 }
 
@@ -170,6 +168,7 @@ export async function handleNewTTL(
 }
 
 export async function handleNewOwner(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog
@@ -180,6 +179,7 @@ export async function handleNewOwner(
   let event = fixedRegistry.events.NewOwner.decode(raw_event);
 
   await _handleNewOwner(
+    log,
     store,
     block,
     event.node,
@@ -191,6 +191,7 @@ export async function handleNewOwner(
 
 
 export async function handleNewOwnerOldRegistry(
+  log: Logger,
   store: Store,
   block: EvmBlock,
   raw_event: EvmLog
@@ -206,6 +207,7 @@ export async function handleNewOwnerOldRegistry(
 
   if (domain == null) {
     await _handleNewOwner(
+      log,
       store,
       block,
       event.node,
@@ -216,6 +218,7 @@ export async function handleNewOwnerOldRegistry(
   } else {
     if (domain.isMigrated == false) {
       await _handleNewOwner(
+        log,
         store,
         block,
         event.node,

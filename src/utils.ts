@@ -114,13 +114,16 @@ export function checkValidLabel(name: string): boolean {
 }
 
 export async function nameByHash(
+  log: Logger,
   store: Store,
   hash: string
 ): Promise<string | null> {
   let ensName = await store.findOne(ensNames, { where: { hash: hash } });
   if (ensName == null) {
+    log.info(`No name found for hash ${hash}`);
     return null;
   }
+  log.info(`Name found for hash ${hash}: ${ensName.name}`);
   return ensName.name;
 }
 

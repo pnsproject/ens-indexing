@@ -185,9 +185,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
         }
         if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {
           if (isOld(i.address)) {
-            await handleNewOwnerOldRegistry(ctx.store, c.header, i.evmLog);
+            await handleNewOwnerOldRegistry(ctx.log, ctx.store, c.header, i.evmLog);
           } else {
-            await handleNewOwner(ctx.store, c.header, i.evmLog);
+            await handleNewOwner(ctx.log, ctx.store, c.header, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewResolver.topic) {
