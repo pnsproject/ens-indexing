@@ -123,7 +123,7 @@ export async function nameByHash(
     log.info(`No name found for hash ${hash}`);
     return null;
   }
-  log.info(`Name found for hash ${hash}: ${ensName.name}`);
+  //log.info(`Name found for hash ${hash}: ${ensName.name}`);
   return ensName.name;
 }
 

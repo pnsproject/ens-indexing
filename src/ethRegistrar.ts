@@ -55,8 +55,11 @@ export async function handleNameRegistered(
     if (labelName) {
       domain.labelName = labelName;
       domain.name = labelName + ".eth";
-      domain.parent = await store.get(Domain, "0x2cce564b191058ca62a839a90fe8bce598992c18b4f37fc64c2ce988f45bf5ef");
       registration.labelName = labelName;
+    }
+
+    if (domain.parent == null && domain.name != null) {
+      domain.parent = await store.get(Domain, "0x2cce564b191058ca62a839a90fe8bce598992c18b4f37fc64c2ce988f45bf5ef");
     }
     domain.labelhash = labelHash;
     await store.upsert(domain);
