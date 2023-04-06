@@ -178,9 +178,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       if (i.kind === "evmLog") {
         if (i.evmLog.topics[0] === registry.events.Transfer.topic) {
           if (isOld(i.address)) {
-            await handleTransferOldRegistry(ctx.store, i.evmLog);
+            await handleTransferOldRegistry(ctx.log, ctx.store, i.evmLog);
           } else {
-            await handleTransfer(ctx.store, i.evmLog);
+            await handleTransfer(ctx.log, ctx.store, i.evmLog);
           }
         }
         if (i.evmLog.topics[0] === registry.events.NewOwner.topic) {

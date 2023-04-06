@@ -106,6 +106,7 @@ async function _handleNewOwner(
 }
 
 export async function handleTransfer(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
@@ -115,7 +116,12 @@ export async function handleTransfer(
   let account = await createOrLoadAccount(store, event.owner);
 
   // Update the domain owner
-  let domain = (await getDomain(store, node))!;
+  let domain = await getDomain(store, node);
+
+  if (domain == null) {
+    log.info(`not found domain for ${node}`);
+    return;
+  }
 
   domain.owner = account;
   await store.upsert(domain);
@@ -266,6 +272,7 @@ export async function handleNewTTLOldRegistry(
 }
 
 export async function handleTransferOldRegistry(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
@@ -273,7 +280,7 @@ export async function handleTransferOldRegistry(
   let domain = await getDomain(store, event.node);
   if (domain) {
     if (domain.isMigrated == false) {
-      await handleTransfer(store, raw_event);
+      await handleTransfer(log, store, raw_event);
     }
   }
 }
