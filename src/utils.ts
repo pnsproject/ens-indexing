@@ -144,21 +144,21 @@ export async function insertOrUpsert<E extends Entity>(store: Store, entityClass
 }
 
 export function createDomain(props: Partial<Domain> = {}): Domain {
-  const domain = new Domain();
-
-  domain.id = props.id || '';
-  domain.name = props.name || null;
-  domain.labelName = props.labelName || null;
-  domain.labelhash = props.labelhash || null;
-  domain.parent = props.parent || null;
-  domain.subdomains = props.subdomains || [];
-  domain.subdomainCount = props.subdomainCount || 0;
-  domain.resolvedAddress = props.resolvedAddress || null;
-  domain.owner = props.owner || new Account();
-  domain.resolver = props.resolver || null;
-  domain.ttl = props.ttl || null;
-  domain.isMigrated = props.isMigrated || false;
-  domain.createdAt = props.createdAt || BigInt(0);
+  const domain = new Domain({
+    id: props.id || '',
+    name: props.name || null,
+    labelName: props.labelName || null,
+    labelhash: props.labelhash || null,
+    parent: props.parent || null,
+    subdomains: props.subdomains || [],
+    subdomainCount: props.subdomainCount || 0,
+    resolvedAddress: props.resolvedAddress || null,
+    owner: props.owner || new Account(),
+    resolver: props.resolver || null,
+    ttl: props.ttl || null,
+    isMigrated: props.isMigrated || false,
+    createdAt: props.createdAt || BigInt(0),
+  });
 
   return domain;
 }
