@@ -52,7 +52,7 @@ export async function handleNameRegistered(
 
     let labelHash = label.toString();
     let labelName = await nameByHash(log, store, labelHash);
-    if (labelName != null) {
+    if (labelName) {
       domain.labelName = labelName;
       domain.name = labelName + ".eth";
       registration.labelName = labelName;

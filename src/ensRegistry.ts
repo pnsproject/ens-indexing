@@ -75,8 +75,8 @@ async function _handleNewOwner(
   if (domain.name == null) {
     // Get label and node names
     let real_label = await nameByHash(log, store, label);
-    if (real_label != null) {
-      domain.labelName = label;
+    if (real_label) {
+      domain.labelName = real_label;
     } else {
       real_label = "[" + label.slice(2) + "]";
     }
@@ -92,6 +92,8 @@ async function _handleNewOwner(
         if (name) {
           domain.name = real_label + "." + name;
         }
+      } else {
+        domain.name = real_label + ".eth";
       }
     }
   }
