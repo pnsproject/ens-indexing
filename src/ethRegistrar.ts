@@ -117,8 +117,14 @@ async function setNamePreimage(
     return;
   }
 
-  let domainId = namehash(name + '.eth');
-  log.info(`set domain id: ${domainId}`);
+  let domainId;
+  try {
+    domainId = namehash(name + '.eth');
+    log.info(`set domain id: ${domainId}`);
+  } catch (error) {
+    log.error(`Error in namehash function: ${error}`);
+    return;
+  }
 
   let domain = await getDomain(
     store,
