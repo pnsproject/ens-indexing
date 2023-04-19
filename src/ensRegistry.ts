@@ -127,42 +127,54 @@ export async function handleTransfer(
   await store.upsert(domain);
 }
 
+const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 // Handler for NewResolver events
 export async function handleNewResolver(
   log: Logger,
   store: Store,
-  raw_event: EvmLog
-): Promise<void> {
+  raw_event: EvmLog): Promise<void> {
   let event = registry.events.NewResolver.decode(raw_event);
 
-  let id = event.resolver.concat("-").concat(event.node);
+  let id: string | null;
+
+  // if resolver is set to 0x0, set id to null
+  // we don't want to create a resolver entity for 0x0
+  if (event.resolver === EMPTY_ADDRESS) {
+    id = null;
+  } else {
+    id = event.resolver
+      .concat("-")
+      .concat(event.node);
+  }
 
   let node = event.node;
   let domain = await getDomain(store, node);
-
   if (domain == null) {
-    log.info(`not found domain for ${node}`);
     return;
   }
 
-  let resolver = await store.get(Resolver, id);
-  if (resolver == null) {
-    resolver = new Resolver({ id });
-    resolver.domain = domain;
-    resolver.address = event.resolver;
-    await store.insert(resolver);
-  } else {
-    domain.resolvedAddress = resolver.addr;
-  }
-  log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
-  try {
-    domain.resolver = resolver;
-  } catch (e) {
-    log.error(`set domain resolver: ${e}`);
-  }
 
+  if (id) {
+    let resolver = await store.get(Resolver, id);
+    if (resolver == null) {
+      resolver = new Resolver({ id, domain, address: event.resolver });
+      log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
+      await store.insert(resolver);
+      // since this is a new resolver entity, there can't be a resolved address yet so set to null
+      domain.resolvedAddress = null;
+    } else {
+      domain.resolvedAddress = resolver.addr;
+    }
+    domain.resolver = resolver;
+  } else {
+    domain.resolver = null;
+    domain.resolvedAddress = null;
+  }
   await store.upsert(domain);
 }
+
+
 
 // Handler for NewTTL events
 export async function handleNewTTL(
