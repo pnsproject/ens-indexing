@@ -160,7 +160,6 @@ export async function handleNewResolver(
     let resolver = await store.get(Resolver, id);
     if (resolver == null) {
       resolver = new Resolver({ id, domain, address: event.resolver });
-      log.info(`handleNewResolver: ${JSON.stringify(resolver)}`);
       await store.insert(resolver);
       // since this is a new resolver entity, there can't be a resolved address yet so set to null
       domain.resolvedAddress = null;
