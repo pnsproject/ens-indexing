@@ -135,6 +135,7 @@ export async function handleNameRenewed(
 }
 
 export async function handleNameTransferred(
+  log: Logger,
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
@@ -145,7 +146,7 @@ export async function handleNameTransferred(
   let label = hexlify(event.tokenId.toBigInt());
   let registration = await store.get(Registration, label);
   if (registration == null) return;
-
+  log.info(`JSON: ${JSON.stringify(registration)}`);
   registration.registrant = account;
   await store.upsert(registration);
 }

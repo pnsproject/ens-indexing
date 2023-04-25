@@ -256,7 +256,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           await handleNameRenewed(ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === registrar.events.Transfer.topic) {
-          await handleNameTransferred(ctx.store, i.evmLog);
+          await handleNameTransferred(ctx.log, ctx.store, i.evmLog);
         }
         if (i.evmLog.topics[0] === controllerOld.events.NameRegistered.topic) {
           await handleNameRegisteredByControllerOld(ctx.log, ctx.store, i.evmLog);
