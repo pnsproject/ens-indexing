@@ -26,14 +26,15 @@ export async function handleNameRegistered(
   let event = registrar.events.NameRegistered.decode(raw_event);
   let owner = await createOrLoadAccount(store, event.owner);
 
-  let label = event.id.toBigInt().toString(16);
+  let label = hexlify(event.id.toBigInt());
+
   let domainId = hexlify(keccak256(concat([rootNode, label])));
   log.info(`handle name registered ${domainId} ${event.id}`);
   let domain = await getDomain(store, domainId);
   if (domain) {
     let registration = await createOrLoadRegistration(
       store,
-      label.toString(),
+      label,
       domain,
       BigInt(block.timestamp),
       event.expires.toBigInt(),
@@ -45,7 +46,7 @@ export async function handleNameRegistered(
     registration.expiryDate = event.expires.toBigInt();
     registration.registrant = owner;
 
-    let labelHash = label.toString();
+    let labelHash = label;
     let labelName = await nameByHash(log, store, labelHash);
     if (labelName) {
       domain.labelName = labelName;
@@ -150,8 +151,8 @@ export async function handleNameRenewed(
   raw_event: EvmLog
 ): Promise<void> {
   let event = registrar.events.NameRenewed.decode(raw_event);
-  let label = event.id.toBigInt().toString(16);
-  let registration = await store.get(Registration, label.toString());
+  let label = hexlify(event.id.toBigInt());
+  let registration = await store.get(Registration, label);
   if (registration) {
     registration.expiryDate = event.expires.toBigInt();
     await store.upsert(registration);
@@ -166,8 +167,8 @@ export async function handleNameTransferred(
 
   let account = await createOrLoadAccount(store, event.to);
 
-  let label = event.tokenId.toBigInt().toString(16);
-  let registration = await store.get(Registration, label.toString());
+  let label = hexlify(event.tokenId.toBigInt());
+  let registration = await store.get(Registration, label);
   if (registration == null) return;
 
   registration.registrant = account;
