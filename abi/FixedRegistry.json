@@ -1,24 +1,58 @@
 [
-    {
-        "type": "event",
-        "anonymous": false,
-        "name": "NewOwner",
-        "inputs": [
-            {
-                "type": "bytes32",
-                "name": "node",
-                "indexed": true
-            },
-            {
-                "type": "bytes32",
-                "name": "label",
-                "indexed": true
-            },
-            {
-                "type": "uint256",
-                "name": "owner",
-                "indexed": false
-            }
-        ]
-    }
-  ]
+  {
+    "type": "event",
+    "anonymous": false,
+    "name": "NewOwner",
+    "inputs": [
+      {
+        "type": "bytes32",
+        "name": "node",
+        "indexed": true
+      },
+      {
+        "type": "bytes32",
+        "name": "label",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "owner",
+        "indexed": false
+      }
+    ]
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "node",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "resolver",
+        "type": "uint256"
+      }
+    ],
+    "name": "NewResolver",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "node",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "owner",
+        "type": "uint256"
+      }
+    ],
+    "name": "Transfer",
+    "type": "event"
+  }
+]

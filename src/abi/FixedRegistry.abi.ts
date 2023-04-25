@@ -20,5 +20,39 @@ export const ABI_JSON = [
                 "indexed": false
             }
         ]
+    },
+    {
+        "type": "event",
+        "anonymous": false,
+        "name": "NewResolver",
+        "inputs": [
+            {
+                "type": "bytes32",
+                "name": "node",
+                "indexed": true
+            },
+            {
+                "type": "uint256",
+                "name": "resolver",
+                "indexed": false
+            }
+        ]
+    },
+    {
+        "type": "event",
+        "anonymous": false,
+        "name": "Transfer",
+        "inputs": [
+            {
+                "type": "bytes32",
+                "name": "node",
+                "indexed": true
+            },
+            {
+                "type": "uint256",
+                "name": "owner",
+                "indexed": false
+            }
+        ]
     }
 ]

@@ -108,10 +108,13 @@ export async function handleTransfer(
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = registry.events.Transfer.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.Transfer.topic) {
+    raw_event.topics[0] = fixedRegistry.events.Transfer.topic
+  }
+  let event = fixedRegistry.events.Transfer.decode(raw_event);
   let node = event.node;
 
-  let account = await createOrLoadAccount(store, event.owner);
+  let account = await createOrLoadAccount(store, hexlify(event.owner.toBigInt()));
 
   // Update the domain owner
   let domain = await getDomain(store, node);
@@ -132,7 +135,10 @@ export async function handleNewResolver(
   log: Logger,
   store: Store,
   raw_event: EvmLog): Promise<void> {
-  let event = registry.events.NewResolver.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.NewResolver.topic) {
+    raw_event.topics[0] = fixedRegistry.events.NewResolver.topic
+  }
+  let event = fixedRegistry.events.NewResolver.decode(raw_event);
 
   let id: string | null;
 
@@ -140,10 +146,11 @@ export async function handleNewResolver(
 
   // if resolver is set to 0x0, set id to null
   // we don't want to create a resolver entity for 0x0
-  if (event.resolver === EMPTY_ADDRESS) {
+  let resolvedAddress = hexlify(event.resolver.toBigInt());
+  if (resolvedAddress === EMPTY_ADDRESS) {
     id = null;
   } else {
-    id = event.resolver
+    id = resolvedAddress
       .concat("-")
       .concat(event.node);
   }
@@ -159,7 +166,7 @@ export async function handleNewResolver(
   if (id) {
     let resolver = await store.get(Resolver, id);
     if (resolver == null) {
-      resolver = new Resolver({ id, domain, address: event.resolver });
+      resolver = new Resolver({ id, domain, address: resolvedAddress });
       await store.insert(resolver);
       // since this is a new resolver entity, there can't be a resolved address yet so set to null
       domain.resolvedAddress = null;
@@ -261,7 +268,11 @@ export async function handleNewResolverOldRegistry(
   block: EvmBlock,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = registry.events.NewResolver.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.NewResolver.topic) {
+    raw_event.topics[0] = fixedRegistry.events.NewResolver.topic
+  }
+  let event = fixedRegistry.events.NewResolver.decode(raw_event);
+  log.info(`handleNewResolverOldRegistry ${event}`);
   let node = event.node;
   let domain = await getDomain(store, node, BigInt(block.timestamp));
   if (domain) {
@@ -288,7 +299,10 @@ export async function handleTransferOldRegistry(
   store: Store,
   raw_event: EvmLog
 ): Promise<void> {
-  let event = registry.events.Transfer.decode(raw_event);
+  if (raw_event.topics[0] != fixedRegistry.events.Transfer.topic) {
+    raw_event.topics[0] = fixedRegistry.events.Transfer.topic
+  }
+  let event = fixedRegistry.events.Transfer.decode(raw_event);
   let domain = await getDomain(store, event.node);
   if (domain) {
     if (domain.isMigrated == false) {
