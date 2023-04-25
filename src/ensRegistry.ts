@@ -151,6 +151,7 @@ export async function handleNewResolver(
   let node = event.node;
   let domain = await getDomain(store, node);
   if (domain == null) {
+    log.info(`not found domain for ${node}`);
     return;
   }
 
