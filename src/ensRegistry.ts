@@ -90,7 +90,7 @@ async function _handleNewOwner(
           domain.name = real_label + "." + name;
         }
       } else {
-        log.info(`not found parent ${node} for ${real_label}`);
+        log.error(`not found parent ${node} for ${real_label}`);
       }
     }
   }

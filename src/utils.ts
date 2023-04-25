@@ -71,19 +71,6 @@ export async function createOrLoadRegistration(
   return registration;
 }
 
-export function checkValidLabel(name: string): boolean {
-  for (let i = 0; i < name.length; i++) {
-    let c = name.charCodeAt(i);
-    if (c === 0) {
-      return false;
-    } else if (c === 46) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 export async function nameByHash(
   log: Logger,
   store: Store,

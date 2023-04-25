@@ -1,7 +1,6 @@
 import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import {
-  checkValidLabel,
   createOrLoadAccount,
   createOrLoadRegistration,
   nameByHash,
@@ -11,7 +10,7 @@ import * as controllerOld from "./abi/EthRegistrarControllerOld";
 import * as controller from "./abi/EthRegistrarController";
 import { Logger } from "@subsquid/logger";
 
-import { keccak256, namehash, concat, hexlify } from "ethers/lib/utils";
+import { keccak256, namehash, concat, hexlify, isValidName } from "ethers/lib/utils";
 import { Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
 
@@ -109,34 +108,21 @@ async function setNamePreimage(
 ): Promise<void> {
   log.info(`set name preimage: ${name} ${label}`);
 
-  if (!checkValidLabel(name)) {
+  if (!isValidName(name)) {
+    log.error(`invalid name: ${name}`);
     return;
   }
 
-  let domainId;
-  try {
-    domainId = namehash(name + '.eth');
-    log.info(`set domain id: ${domainId}`);
-  } catch (error) {
-    log.error(`Error in namehash function: ${error}`);
+  let domain = await store.get(Domain, hexlify(keccak256(concat([rootNode, label]))));
+
+  if (domain == null) {
+    log.error(`domain not found: ${label}`);
     return;
   }
-
-  let domain = await getDomain(
-    store,
-    domainId
-  );
-
-  if (domain) {
-    if (domain.labelName !== name) {
-      domain.labelName = name;
-      domain.name = name + ".eth";
-      await store.upsert(domain);
-    } else {
-      log.info(`label name is same: ${domain.labelName}`);
-    }
-  } else {
-    log.info(`domain not found: ${domainId} ${name}`);
+  if (domain.labelName !== name) {
+    domain.labelName = name;
+    domain.name = name + ".eth";
+    await store.upsert(domain);
   }
 
   let registration = await store.get(Registration, label);
