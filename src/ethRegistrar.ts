@@ -1,26 +1,21 @@
 import { EvmBlock, EvmLog } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import {
-  byteArrayFromHex,
   checkValidLabel,
-  concat,
   createOrLoadAccount,
   createOrLoadRegistration,
   nameByHash,
-  uint256ToByteArray,
 } from "./utils";
 import * as registrar from "./abi/BaseRegistrar";
 import * as controllerOld from "./abi/EthRegistrarControllerOld";
 import * as controller from "./abi/EthRegistrarController";
 import { Logger } from "@subsquid/logger";
 
-import { keccak256, namehash } from "ethers/lib/utils";
+import { keccak256, namehash, concat, hexlify } from "ethers/lib/utils";
 import { Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
 
-var rootNode: Uint8Array = byteArrayFromHex(
-  "93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"
-);
+var rootNode: string = "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
 
 export async function handleNameRegistered(
   log: Logger,
@@ -31,8 +26,8 @@ export async function handleNameRegistered(
   let event = registrar.events.NameRegistered.decode(raw_event);
   let owner = await createOrLoadAccount(store, event.owner);
 
-  let label = uint256ToByteArray(event.id.toBigInt());
-  let domainId = keccak256(concat(rootNode, label));
+  let label = event.id.toBigInt().toString(16);
+  let domainId = hexlify(keccak256(concat([rootNode, label])));
   log.info(`handle name registered ${domainId} ${event.id}`);
   let domain = await getDomain(store, domainId);
   if (domain) {
@@ -155,7 +150,7 @@ export async function handleNameRenewed(
   raw_event: EvmLog
 ): Promise<void> {
   let event = registrar.events.NameRenewed.decode(raw_event);
-  let label = uint256ToByteArray(event.id.toBigInt());
+  let label = event.id.toBigInt().toString(16);
   let registration = await store.get(Registration, label.toString());
   if (registration) {
     registration.expiryDate = event.expires.toBigInt();
@@ -171,7 +166,7 @@ export async function handleNameTransferred(
 
   let account = await createOrLoadAccount(store, event.to);
 
-  let label = uint256ToByteArray(event.tokenId.toBigInt());
+  let label = event.tokenId.toBigInt().toString(16);
   let registration = await store.get(Registration, label.toString());
   if (registration == null) return;
 

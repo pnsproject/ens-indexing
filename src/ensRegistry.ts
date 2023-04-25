@@ -8,13 +8,10 @@ import { Logger } from "@subsquid/logger";
 import {
   createOrLoadAccount,
   ROOT_NODE,
-  concat,
-  byteArrayFromHex,
   nameByHash,
   createDomain,
 } from "./utils";
-import { keccak256 } from "ethers/lib/utils";
-import { LogEvent } from "./abi/abi.support";
+import { concat, hexlify, keccak256 } from "ethers/lib/utils";
 
 
 export async function getDomain(
@@ -37,7 +34,7 @@ export async function getDomain(
 }
 
 function makeSubnode(node: string, label: string): string {
-  return keccak256(concat(byteArrayFromHex(node), byteArrayFromHex(label)));
+  return hexlify(keccak256(concat([node, label])));
 }
 // Handler for NewOwner events
 async function _handleNewOwner(
@@ -93,7 +90,7 @@ async function _handleNewOwner(
           domain.name = real_label + "." + name;
         }
       } else {
-        domain.name = real_label + ".eth";
+        log.info(`not found parent ${node} for ${real_label}`);
       }
     }
   }
@@ -104,6 +101,7 @@ async function _handleNewOwner(
   domain.isMigrated = isMigrated;
   await store.upsert(domain);
 }
+
 
 export async function handleTransfer(
   log: Logger,
@@ -137,6 +135,8 @@ export async function handleNewResolver(
   let event = registry.events.NewResolver.decode(raw_event);
 
   let id: string | null;
+
+  log.info(`new resolver ${event.resolver}`);
 
   // if resolver is set to 0x0, set id to null
   // we don't want to create a resolver entity for 0x0
