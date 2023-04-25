@@ -23,43 +23,32 @@ export async function handleNameRegistered(
   raw_event: EvmLog
 ): Promise<void> {
   let event = registrar.events.NameRegistered.decode(raw_event);
-  let owner = await createOrLoadAccount(store, event.owner);
+
+  let account = await createOrLoadAccount(store, event.owner);
 
   let label = hexlify(event.id.toBigInt());
 
   let domainId = hexlify(keccak256(concat([rootNode, label])));
   log.info(`handle name registered ${domainId} ${event.id}`);
   let domain = await getDomain(store, domainId);
-  if (domain) {
-    let registration = await createOrLoadRegistration(
-      store,
-      label,
-      domain,
-      BigInt(block.timestamp),
-      event.expires.toBigInt(),
-      owner
-    );
-
-    registration.domain = domain;
-    registration.registrationDate = BigInt(block.timestamp);
-    registration.expiryDate = event.expires.toBigInt();
-    registration.registrant = owner;
-
-    let labelHash = label;
-    let labelName = await nameByHash(log, store, labelHash);
-    if (labelName) {
-      domain.labelName = labelName;
-      domain.name = labelName + ".eth";
-      registration.labelName = labelName;
-    }
-
-    if (domain.parent == null && domain.name != null) {
-      domain.parent = await store.get(Domain, "0x2cce564b191058ca62a839a90fe8bce598992c18b4f37fc64c2ce988f45bf5ef");
-    }
-    domain.labelhash = labelHash;
-    await store.upsert(domain);
-    await store.upsert(registration);
+  if (domain == null) {
+    log.error(`handleNameRegistered domain not found: ${domainId}`);
+    return;
   }
+  let registration = await createOrLoadRegistration(store, label, domain, BigInt(block.timestamp), event.expires.toBigInt(), account);
+  registration.domain = domain;
+  registration.registrationDate = BigInt(block.timestamp);
+  registration.expiryDate = event.expires.toBigInt();
+  registration.registrant = account;
+
+  let labelName = await nameByHash(log, store, label);
+  if (labelName != null) {
+    domain.labelName = labelName;
+    domain.name = labelName! + ".eth";
+    registration.labelName = labelName;
+  }
+  store.upsert(domain);
+  store.upsert(registration);
 }
 
 export async function handleNameRegisteredByControllerOld(
@@ -116,7 +105,7 @@ async function setNamePreimage(
   let domain = await store.get(Domain, hexlify(keccak256(concat([rootNode, label]))));
 
   if (domain == null) {
-    log.error(`domain not found: ${label}`);
+    log.error(`setNamePreimage domain not found: ${label}`);
     return;
   }
   if (domain.labelName !== name) {
