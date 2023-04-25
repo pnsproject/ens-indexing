@@ -146,7 +146,7 @@ export async function handleNameTransferred(
   let label = hexlify(event.tokenId.toBigInt());
   let registration = await store.get(Registration, label);
   if (registration == null) return;
-  log.info(`JSON: ${JSON.stringify(registration)}`);
+  log.info(`JSON: ${JSON.stringify(registration.domain)}`);
   registration.registrant = account;
   await store.upsert(registration);
 }
