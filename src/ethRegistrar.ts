@@ -13,6 +13,7 @@ import { Logger } from "@subsquid/logger";
 import { keccak256, namehash, concat, hexlify, isValidName } from "ethers/lib/utils";
 import { Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
+import { EntityManager } from "typeorm";
 
 var rootNode: string = "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
 
@@ -146,6 +147,11 @@ export async function handleNameTransferred(
   let label = hexlify(event.tokenId.toBigInt());
   let registration = await store.get(Registration, label);
   if (registration == null) return;
+  if (registration.domain == null) {
+    let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
+    em.queryRunner?.clearSqlMemory();
+  }
+
   log.info(`JSON: ${JSON.stringify(registration.domain)}`);
   registration.registrant = account;
   await store.upsert(registration);

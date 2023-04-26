@@ -64,6 +64,8 @@ export async function createOrLoadRegistration(
       registrant,
       registrationDate,
       expiryDate,
+      cost: null,
+      labelName: null,
     });
     await store.insert(registration);
   }
