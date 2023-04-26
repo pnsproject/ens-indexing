@@ -68,9 +68,9 @@ export async function createOrLoadRegistration(
       cost: null,
       labelName: null,
     });
-    await store.insert(registration);
+    // await store.insert(registration);
     let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
-    await em.queryRunner?.commitTransaction();
+    await em.save(registration);
   }
 
   return registration;
