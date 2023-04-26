@@ -147,9 +147,13 @@ export async function handleNameTransferred(
   let registration = await store.get(Registration, label);
   if (registration == null) return;
 
-  log.info(`JSON: ${JSON.stringify(registration.domain)}`);
   registration.registrant = account;
-  log.info(`handleNameTransferred: ${account}`);
-
-  await store.upsert(registration);
+  try {
+    await store.upsert(registration)
+  } catch (e) {
+    log.error(`handleNameTransferred error: ${e}`);
+    // 使用 Promise 和 setTimeout 实现非阻塞的延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await handleNameTransferred(log, store, raw_event);
+  }
 }
