@@ -149,7 +149,7 @@ export async function handleNameTransferred(
   if (registration == null) return;
   if (registration.domain == null) {
     let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
-    em.queryRunner?.clearSqlMemory();
+    await em.queryRunner?.commitTransaction();
   }
 
   log.info(`JSON: ${JSON.stringify(registration.domain)}`);
