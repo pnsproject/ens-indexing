@@ -150,6 +150,10 @@ export async function handleNameTransferred(
   if (registration == null) return;
   if (registration.domain == null) {
     log.error(`processTransferredEvent failed: domain not found: ${label}`);
+    let domain = await store.get(Domain, hexlify(keccak256(concat([rootNode, label]))));
+    if (domain) {
+      registration.domain = domain;
+    }
   }
   registration.registrant = account;
   await store.upsert(registration);
