@@ -11,8 +11,9 @@ import * as controller from "./abi/EthRegistrarController";
 import { Logger } from "@subsquid/logger";
 
 import { keccak256, namehash, concat, hexlify, isValidName } from "ethers/lib/utils";
-import { Domain, Registration } from "./model";
+import { Account, Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
+import { BigNumber } from "ethers";
 
 var rootNode: string = "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
 
@@ -134,6 +135,29 @@ export async function handleNameRenewed(
   }
 }
 
+async function processTransferredEvent(
+  log: Logger,
+  store: Store,
+  event: [from: string, to: string, tokenId: BigNumber] & {
+    from: string;
+    to: string;
+    tokenId: BigNumber;
+  },
+  account: Account,
+  label: string,
+): Promise<void> {
+  let registration = await store.get(Registration, label);
+  if (registration == null) return;
+  registration.registrant = account;
+  try {
+    await store.upsert(registration);
+  } catch (e) {
+    log.error(`processTransferredEvent error: ${e}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await processTransferredEvent(log, store, event, account, label);
+  }
+}
+
 export async function handleNameTransferred(
   log: Logger,
   store: Store,
@@ -144,16 +168,6 @@ export async function handleNameTransferred(
   let account = await createOrLoadAccount(store, event.to);
 
   let label = hexlify(event.tokenId.toBigInt());
-  let registration = await store.get(Registration, label);
-  if (registration == null) return;
 
-  registration.registrant = account;
-  try {
-    await store.upsert(registration)
-  } catch (e) {
-    log.error(`handleNameTransferred error: ${e}`);
-    // 使用 Promise 和 setTimeout 实现非阻塞的延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await handleNameTransferred(log, store, raw_event);
-  }
+  await processTransferredEvent(log, store, event, account, label);
 }
