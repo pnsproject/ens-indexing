@@ -4,7 +4,6 @@ import { Entity, EntityClass, Store } from "@subsquid/typeorm-store";
 import { LogEvent, LogRecord } from "./abi/abi.support";
 import { Account, Domain, ensNames, Registration } from "./model";
 import { Logger } from "@subsquid/logger";
-import { EntityManager } from "typeorm";
 
 export function createEventID(block: EvmBlock, raw_event: EvmLog): string {
   return block.height.toString().concat("-").concat(raw_event.index.toString());
@@ -68,9 +67,7 @@ export async function createOrLoadRegistration(
       cost: null,
       labelName: null,
     });
-    // await store.insert(registration);
-    let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
-    await em.save(registration);
+    await store.insert(registration);
   }
 
   return registration;

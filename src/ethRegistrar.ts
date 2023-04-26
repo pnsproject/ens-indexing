@@ -14,6 +14,7 @@ import { keccak256, namehash, concat, hexlify, isValidName } from "ethers/lib/ut
 import { Account, Domain, Registration } from "./model";
 import { getDomain } from "./ensRegistry";
 import { BigNumber } from "ethers";
+import { EntityManager } from "typeorm";
 
 var rootNode: string = "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
 
@@ -150,6 +151,8 @@ async function processTransferredEvent(
   if (registration == null) return;
   if (registration.domain == null) {
     log.error(`processTransferredEvent failed: domain not found: ${label}`);
+    let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
+    await em.queryRunner?.commitTransaction();
     await new Promise(resolve => setTimeout(resolve, 1000));
     await processTransferredEvent(log, store, event, account, label);
   }
