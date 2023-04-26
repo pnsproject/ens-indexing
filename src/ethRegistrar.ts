@@ -146,15 +146,18 @@ async function processTransferredEvent(
   },
   account: Account,
   label: string,
+  first: boolean
 ): Promise<void> {
   let registration = await store.get(Registration, label);
   if (registration == null) return;
   if (registration.domain == null) {
     log.error(`processTransferredEvent failed: domain not found: ${label}`);
-    let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
-    await em.queryRunner?.commitTransaction();
+    if (first) {
+      let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
+      await em.queryRunner?.commitTransaction();
+    }
     await new Promise(resolve => setTimeout(resolve, 1000));
-    await processTransferredEvent(log, store, event, account, label);
+    await processTransferredEvent(log, store, event, account, label, false);
   }
   registration.registrant = account;
   await store.upsert(registration);
@@ -171,5 +174,5 @@ export async function handleNameTransferred(
 
   let label = hexlify(event.tokenId.toBigInt());
 
-  await processTransferredEvent(log, store, event, account, label);
+  await processTransferredEvent(log, store, event, account, label, true);
 }
