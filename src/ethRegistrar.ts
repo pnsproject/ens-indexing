@@ -148,14 +148,13 @@ async function processTransferredEvent(
 ): Promise<void> {
   let registration = await store.get(Registration, label);
   if (registration == null) return;
-  registration.registrant = account;
-  try {
-    await store.upsert(registration);
-  } catch (e) {
-    log.error(`processTransferredEvent error: ${e}`);
+  if (registration.domain == null) {
+    log.error(`processTransferredEvent failed: domain not found: ${label}`);
     await new Promise(resolve => setTimeout(resolve, 1000));
     await processTransferredEvent(log, store, event, account, label);
   }
+  registration.registrant = account;
+  await store.upsert(registration);
 }
 
 export async function handleNameTransferred(
