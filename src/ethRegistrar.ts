@@ -150,6 +150,11 @@ export async function handleNameTransferred(
   if (registration.domain == null) {
     let em = await (store as unknown as { em: () => Promise<EntityManager> }).em();
     await em.queryRunner?.commitTransaction();
+    registration = await store.get(Registration, label);
+    if (registration == null) {
+      log.error(`handleNameTransferred registration not found: ${label}`);
+      return;
+    };
   }
 
   log.info(`JSON: ${JSON.stringify(registration.domain)}`);
