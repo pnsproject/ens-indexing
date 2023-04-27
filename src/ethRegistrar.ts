@@ -117,6 +117,13 @@ async function setNamePreimage(
 
   let registration = await store.get(Registration, label);
   if (registration == null) return;
+  if (registration.domain == null) {
+    log.error(`setNamePreimage failed: domain not found: ${label}`);
+    let domain = await store.get(Domain, hexlify(keccak256(concat([rootNode, label]))));
+    if (domain) {
+      registration.domain = domain;
+    }
+  }
   registration.labelName = name;
   registration.cost = cost;
   await store.upsert(registration);
@@ -129,10 +136,16 @@ export async function handleNameRenewed(
   let event = registrar.events.NameRenewed.decode(raw_event);
   let label = hexlify(event.id.toBigInt());
   let registration = await store.get(Registration, label);
-  if (registration) {
-    registration.expiryDate = event.expires.toBigInt();
-    await store.upsert(registration);
+  if (registration == null) return;
+
+  if (registration.domain == null) {
+    let domain = await store.get(Domain, hexlify(keccak256(concat([rootNode, label]))));
+    if (domain) {
+      registration.domain = domain;
+    }
   }
+  registration.expiryDate = event.expires.toBigInt();
+  await store.upsert(registration);
 }
 
 export async function handleNameTransferred(
